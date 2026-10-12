@@ -203,6 +203,7 @@
           const guildTag = (acc.extra && acc.extra.guildTag) ? acc.extra.guildTag : '';
           const guildBonus = (acc.extra && acc.extra.guildBonus) ? acc.extra.guildBonus : '+0.0% XP';
           const guildMembers = (acc.extra && acc.extra.guildMembers) ? acc.extra.guildMembers : '';
+          const nextRecruit = (acc.extra && acc.extra.nextRecruit) ? acc.extra.nextRecruit : '';
           const hasGuild = guildName && guildName !== 'Nenhuma';
           totalCaps += caps;
 
@@ -233,7 +234,7 @@
             ` : ''}
 
             <div style="background: ${hasGuild ? 'rgba(168, 85, 247, 0.12)' : 'rgba(107, 114, 128, 0.12)'}; border: 1px solid ${hasGuild ? 'rgba(168, 85, 247, 0.35)' : 'rgba(107, 114, 128, 0.25)'}; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
-              <div><strong>🏰 Guilda:</strong> ${hasGuild ? `<span style="color: #c084fc; font-weight: 600;">[${guildTag}] ${guildName}</span> <span style="font-size:0.75rem; color:var(--text-muted);">(${guildMembers})</span>` : '<span style="color: var(--text-muted);">Sem Guilda (Auto-recrutando)</span>'}</div>
+              <div><strong>🏰 Guilda:</strong> ${hasGuild ? `<span style="color: #c084fc; font-weight: 600;">[${guildTag}] ${guildName}</span> <span style="font-size:0.75rem; color:var(--text-muted);">(${guildMembers})</span>` : `<span style="color: var(--text-muted);">Sem Guilda (Recrutando aleatório 2h-8h ${nextRecruit ? '• Próximo em '+nextRecruit : ''})</span>`}</div>
               <span class="badge" style="background: ${hasGuild ? '#7c3aed' : '#374151'}; color: #fff; font-size: 0.72rem;">${guildBonus}</span>
             </div>
 

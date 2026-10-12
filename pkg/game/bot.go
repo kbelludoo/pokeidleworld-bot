@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/url"
 	"os"
 	"strings"
@@ -17,6 +18,41 @@ import (
 	"bot-template-go/pkg/engine"
 	"bot-template-go/pkg/network"
 )
+
+var recruitPhrases = []string{
+	"Procuro guild ativa com bônus de XP, nick: %s (farmando 24/7)",
+	"Opa, alguma guilda ativa com vaga pra quem joga todo dia? nick: %s",
+	"Procurando guild com bônus de xp, nick: %s on direto",
+	"Alguém com vaga em guilda ativa? nick: %s (focado em xp)",
+	"Procuro guild com bônus de XP, nick %s ativo direto aqui",
+	"Salve galera, alguma guilda com vaga aberta? nick: %s",
+	"Alguma guilda ativa recrutando? Nick: %s jogando full time",
+	"Opa, guild ativa recrutando? Nick %s farmando direto aqui",
+}
+
+func getRandomRecruitMessage(tName string) string {
+	idx := rand.Intn(len(recruitPhrases))
+	return fmt.Sprintf(recruitPhrases[idx], tName)
+}
+
+func getRandomRecruitDelay() time.Duration {
+	// Intervalo aleatório de 2h a 8h (120 a 480 minutos) com variação de segundos
+	minutes := 120 + rand.Intn(361)
+	seconds := rand.Intn(60)
+	return time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second
+}
+
+func formatDurationHuman(d time.Duration) string {
+	if d <= 0 {
+		return "agora"
+	}
+	h := int(d.Hours())
+	m := int(d.Minutes()) % 60
+	if h > 0 {
+		return fmt.Sprintf("%dh %02dm", h, m)
+	}
+	return fmt.Sprintf("%dm", m)
+}
 
 type Bot struct {
 	config  AccountConfig
@@ -48,6 +84,7 @@ type Bot struct {
 	invites           []GuildInvite
 	lastGuildCheckAt  time.Time
 	lastRecruitPingAt time.Time
+	nextRecruitPingAt time.Time
 
 	// Temporizadores e controle
 	lastFieldAt   time.Time
@@ -106,17 +143,21 @@ func NewBot(cfg AccountConfig) *Bot {
 
 	httpCli := network.NewHTTPClientWithNetwork("https://poke.idleworld.online", 15*time.Second, cfg.Proxy, cfg.LocalIP)
 
+	firstDelay := time.Duration(45+rand.Intn(75))*time.Minute + time.Duration(rand.Intn(60))*time.Second
+	nextRecruitAt := time.Now().Add(firstDelay)
+
 	return &Bot{
-		config:       cfg,
-		status:       st,
-		httpCli:      httpCli,
-		catalog:      cat,
-		token:        cfg.Credentials.Token,
-		refreshToken: cfg.Credentials.RefreshToken,
-		targetSlug:   cfg.Settings.HuntTarget,
-		ballCounts:   make(map[string]int),
-		ticketChan:   make(chan string, 1),
-		disconnectCh: make(chan error, 1),
+		config:            cfg,
+		status:            st,
+		httpCli:           httpCli,
+		catalog:           cat,
+		token:             cfg.Credentials.Token,
+		refreshToken:      cfg.Credentials.RefreshToken,
+		targetSlug:        cfg.Settings.HuntTarget,
+		ballCounts:        make(map[string]int),
+		ticketChan:        make(chan string, 1),
+		disconnectCh:      make(chan error, 1),
+		nextRecruitPingAt: nextRecruitAt,
 	}
 }
 
@@ -387,7 +428,7 @@ func (b *Bot) superviseSession(ctx context.Context) error {
 			s := b.socket
 			currentGuild := b.guild
 			autoRecruit := b.config.Settings.AutoGuildRecruit
-			lastPing := b.lastRecruitPingAt
+			nextPing := b.nextRecruitPingAt
 			tName := b.status.Name
 			if tName == "" {
 				tName = b.Name()
@@ -398,19 +439,21 @@ func (b *Bot) superviseSession(ctx context.Context) error {
 				// 1. Atualiza dados e lista da guilda a cada 30 segundos
 				_ = s.SendJSON(GuildGetPacket{Type: "guild-get", WithList: true})
 
-				// 2. Se estiver sem guilda e autoRecruit estiver ativo, envia mensagem no canal help a cada 15 min
-				if currentGuild == nil && autoRecruit && (lastPing.IsZero() || time.Since(lastPing) >= 15*time.Minute) {
+				// 2. Se estiver sem guilda e autoRecruit estiver ativo, envia mensagem no canal help com intervalo aleatório entre 2h e 8h
+				if currentGuild == nil && autoRecruit && (nextPing.IsZero() || time.Now().After(nextPing)) {
+					nextDelay := getRandomRecruitDelay()
 					b.mu.Lock()
 					b.lastRecruitPingAt = time.Now()
+					b.nextRecruitPingAt = time.Now().Add(nextDelay)
 					b.mu.Unlock()
 
-					msg := fmt.Sprintf("Procuro guild ativa com bônus de XP, nick: %s (farmando 24/7)", tName)
+					msg := getRandomRecruitMessage(tName)
 					_ = s.SendJSON(SendChatPacket{
 						Type:    "send",
 						Channel: "help",
 						Body:    msg,
 					})
-					b.addLog("📢 [Guilda] Divulgação de recrutamento enviada no canal help do jogo!")
+					b.addLog(fmt.Sprintf("📢 [Guilda] Anúncio aleatório enviado no chat: \"%s\" (próximo sorteado em %s)", msg, formatDurationHuman(nextDelay)))
 				}
 			}
 
@@ -783,11 +826,19 @@ func (b *Bot) handleMessage(data []byte) {
 					}
 				}
 			} else {
+				b.mu.RLock()
+				nextPing := b.nextRecruitPingAt
+				b.mu.RUnlock()
+				nextStr := "em breve"
+				if !nextPing.IsZero() && time.Now().Before(nextPing) {
+					nextStr = formatDurationHuman(time.Until(nextPing))
+				}
 				b.updateStatus(func(st *engine.AccountStatus) {
 					st.Extra["guild"] = "Sem Guilda (Aguardando convite)"
 					st.Extra["guildName"] = "Nenhuma"
 					st.Extra["guildTag"] = ""
 					st.Extra["guildBonus"] = "+0.0% XP"
+					st.Extra["nextRecruit"] = nextStr
 				})
 
 				// Se recebemos convites e autoAccept está ativo
@@ -1222,15 +1273,17 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 		if tName == "" {
 			tName = b.Name()
 		}
-		msg := fmt.Sprintf("Procuro guild ativa com bônus de XP, nick: %s (farmando 24/7)", tName)
+		msg := getRandomRecruitMessage(tName)
 		if custom, ok := payload["message"].(string); ok && custom != "" {
 			msg = custom
 		}
 		if s != nil && s.IsConnected() {
 			_ = s.SendJSON(SendChatPacket{Type: "send", Channel: "help", Body: msg})
+			nextDelay := getRandomRecruitDelay()
 			b.lastRecruitPingAt = time.Now()
-			b.appendLogLocked(fmt.Sprintf("📢 Divulgação de guilda enviada: %s", msg))
-			return "Divulgação de recrutamento enviada no chat help!", nil
+			b.nextRecruitPingAt = time.Now().Add(nextDelay)
+			b.appendLogLocked(fmt.Sprintf("📢 Divulgação de guilda enviada: \"%s\" (próximo sorteado em %s)", msg, formatDurationHuman(nextDelay)))
+			return fmt.Sprintf("Divulgação enviada no chat! Próximo envio sorteado para daqui a %s.", formatDurationHuman(nextDelay)), nil
 		}
 		return nil, fmt.Errorf("socket não conectado")
 
