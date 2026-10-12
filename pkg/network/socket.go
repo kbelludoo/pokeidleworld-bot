@@ -3,7 +3,9 @@ package network
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 
@@ -17,6 +19,8 @@ type DisconnectHandler func(err error)
 type SocketClient struct {
 	url           string
 	headers       http.Header
+	proxyURL      string
+	localAddr     string
 	conn          *websocket.Conn
 	writeMu       sync.Mutex
 	mu            sync.RWMutex
@@ -27,6 +31,10 @@ type SocketClient struct {
 }
 
 func NewSocketClient(url string, headers http.Header, onMsg MessageHandler, onDisc DisconnectHandler) *SocketClient {
+	return NewSocketClientWithNetwork(url, headers, "", "", onMsg, onDisc)
+}
+
+func NewSocketClientWithNetwork(url string, headers http.Header, proxyURL string, localAddr string, onMsg MessageHandler, onDisc DisconnectHandler) *SocketClient {
 	if headers == nil {
 		headers = make(http.Header)
 	}
@@ -38,6 +46,8 @@ func NewSocketClient(url string, headers http.Header, onMsg MessageHandler, onDi
 	return &SocketClient{
 		url:          url,
 		headers:      headers,
+		proxyURL:     proxyURL,
+		localAddr:    localAddr,
 		onMessage:    onMsg,
 		onDisconnect: onDisc,
 		closeChan:    make(chan struct{}),
@@ -47,6 +57,21 @@ func NewSocketClient(url string, headers http.Header, onMsg MessageHandler, onDi
 func (s *SocketClient) Connect() error {
 	dialer := websocket.Dialer{
 		HandshakeTimeout: 15 * time.Second,
+	}
+
+	if s.proxyURL != "" {
+		if parsed, err := url.Parse(s.proxyURL); err == nil {
+			dialer.Proxy = http.ProxyURL(parsed)
+		}
+	}
+
+	if s.localAddr != "" {
+		if ip := net.ParseIP(s.localAddr); ip != nil {
+			dialer.NetDialContext = (&net.Dialer{
+				LocalAddr: &net.TCPAddr{IP: ip},
+				Timeout:   15 * time.Second,
+			}).DialContext
+		}
 	}
 
 	conn, _, err := dialer.Dial(s.url, s.headers)

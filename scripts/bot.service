@@ -1,20 +1,21 @@
 [Unit]
-Description=Native Go Game Bot Service
+Description=Poke Idle World Native Go Bot Service
 After=network.target
 
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/meu-bot
-ExecStart=/home/ubuntu/meu-bot/bot-app-linux
+WorkingDirectory=/home/ubuntu/poke-bot
+ExecStart=/home/ubuntu/poke-bot/bot-poke-linux
 Restart=always
 RestartSec=5s
 LimitNOFILE=65535
 StandardOutput=journal
 StandardError=journal
 
-# Otimizacoes de Memoria Go
+# Otimizacoes de Memoria Go (menos de 10MB)
 Environment=GOGC=50
+Environment=PORT=3003
 
 [Install]
 WantedBy=multi-user.target

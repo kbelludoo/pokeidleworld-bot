@@ -81,7 +81,7 @@ func main() {
 	}
 
 	// 2. Iniciar Servidor Web / Dashboard HTTP
-	webPort := 3006
+	webPort := 3001
 	if p := os.Getenv("PORT"); p != "" {
 		if v, err := strconv.Atoi(p); err == nil && v > 0 {
 			webPort = v
@@ -137,15 +137,29 @@ func main() {
 					if st.MaxHP > 0 {
 						hpPct = (st.HP * 100) / st.MaxHP
 					}
-					manaPct := 0
-					if st.MaxMana > 0 {
-						manaPct = (st.Mana * 100) / st.MaxMana
+					captures := 0
+					if c, ok := st.Extra["captures"].(int); ok {
+						captures = c
+					}
+					balls := 0
+					if b, ok := st.Extra["balls"].(int); ok {
+						balls = b
 					}
 
-					fmt.Printf("▸ [%s] %s (Lv. %d %s) | Status: %s\n", st.ID, st.Name, st.Level, st.Vocation, st.Status)
-					fmt.Printf("  HP: %d/%d (%d%%) | Mana: %d/%d (%d%%) | Ouro: %s | Kills: %d\n", st.HP, st.MaxHP, hpPct, st.Mana, st.MaxMana, manaPct, formatNumber(st.Gold), st.Kills)
+					fmt.Printf("▸ [%s] Treinador: %s (Lv. %d) | Status: %s\n", st.ID, st.Name, st.Level, st.Status)
+					fmt.Printf("  HP Equipe: %d/%d (%d%%) | Ouro: %s | Kills: %d | Capturas: %d | Pokébolas: %d\n", st.HP, st.MaxHP, hpPct, formatNumber(st.Gold), st.Kills, captures, balls)
+					if poke, ok := st.Extra["activePokemon"].(string); ok && poke != "" {
+						pokeTypes, _ := st.Extra["pokemonTypes"].(string)
+						fmt.Printf("  Pokémon Ativo: %s [%s]\n", poke, pokeTypes)
+					}
 					if st.CurrentArea != "" {
-						fmt.Printf("  Área: %s | EXP/H: %.0f | Duração: %ds\n", st.CurrentArea, st.ExpPerHour, st.DurationSec)
+						matchup, _ := st.Extra["matchup"].(string)
+						detail, _ := st.Extra["matchupDetail"].(string)
+						if matchup != "" {
+							fmt.Printf("  Área: %s | Eficácia: %s (%s) | EXP/H: %.0f | Tempo: %ds\n", st.CurrentArea, matchup, detail, st.ExpPerHour, st.DurationSec)
+						} else {
+							fmt.Printf("  Área de Caça: %s | EXP/H: %.0f | Duração: %ds\n", st.CurrentArea, st.ExpPerHour, st.DurationSec)
+						}
 					}
 					fmt.Println("--------------------------------------------------------------------------------")
 				}

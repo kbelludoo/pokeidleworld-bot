@@ -1,131 +1,106 @@
-# ⚡ Pokéidle Go — Autonomous Go Bot, Twitch & Kick Lurker
+# ⚡ Poke Idle World Bot (Go Native Engine)
 
-Bot autônomo de altíssima performance desenvolvido em **Go (Golang)** para o jogo web idle **[Pokéidle](https://pokeidle.io/app)**, equipado com lurker nativo de **Twitch IRC** (+15% a +20% EXP) e **Kick WebSocket Points Miner** (farm contínuo de Pontos de Canal 24/7 sem abrir navegadores).
+Bot autônomo nativo em **Go (Golang)** de altíssima performance e baixíssimo consumo de memória (2 a 5 MB de RAM) para **[Poke Idle World](https://poke.idleworld.online/play)**.
 
 🌐 **Command Center & Live Dashboard (GitHub Pages):**  
 👉 **[https://kbelludoo.github.io/pokeidle-go/](https://kbelludoo.github.io/pokeidle-go/)**
 
 ---
 
-## 🌟 Destaques e Arquitetura
+## 🌟 Recursos do Bot
 
-- 🪶 **Ultra-leve (Consumo < 3 MB RAM):** Enquanto soluções em Python/Docker demandam de 45 a 100 MB de RAM e navegadores passam de 1 GB, o executável Go compila tudo de forma estática e roda com apenas **~2 a 3 MB de heap**.
-- 🎮 **Automação Completa Pokéidle:**
-  - Caça contínua na melhor área disponível.
-  - Cura automática no Centro Pokémon quando a vida cai.
-  - Auto-loot e venda automática de itens excedentes.
-  - Otimização do time de combate (mantém 5 slots cheios para zerar a penalidade de dano de boss).
-  - Renovação automática de sessão JWT (`sessao.renovada`).
-- 🟣 **Twitch IRC Lurker Nativo:**
-  - Conecta-se diretamente aos servidores IRC da Twitch (`irc.chat.twitch.tv:6667`).
-  - Entra nas salas dos canais parceiros oficiais online (`#tftoddy`, `#faasii`, `#axtlol`, `#xdaren_`, `#cogu`, etc.).
-  - Mantém o bônus de **+15% a +20% de XP** ativo 24 horas por dia com zero navegadores.
-- 🟢 **Kick WebSocket Viewer Lurker Nativo:**
-  - Engenharia reversa completa do protocolo de visualização da Kick (`websockets.kick.com`).
-  - Envio contínuo de `channel_handshake` e `tracking.user.watch.livestream` com ID de canal e live.
-  - Credita **+10 Pontos de Canal a cada 5 minutos** automaticamente.
-  - Monitoramento de saldo em tempo real via API `https://kick.com/api/v2/channels/{canal}/points`.
-- 📊 **Dashboard Web & GitHub Pages:**
-  - Servidor local HTTP embutido (`http://localhost:3006`) com métricas em tempo real.
-  - Página estática no GitHub Pages com Command Center integrado da VPS.
+- 🚀 **WebSocket Direto com Sharding Automático:** Conexão nativa calculando o shard exato via hash DJB2 do claim `sub` do JWT (`wss://poke.idleworld.online/ws{shard}?token={token}&v=2`).
+- 🎯 **Caça Inteligente por Fraqueza (Auto-Weakness):** Motor integrado de análise de tipos Pokémon. Calcula multiplicadores ofensivos (até **4.0x de Dano**) e seleciona automaticamente a melhor rota para maximizar EXP/h com menor risco.
+- 🏰 **Automação de Guilda & Recrutamento no Chat:**
+  - Envia anúncios automáticos de recrutamento no canal `help` do jogo a cada 15 minutos: `"Procuro guild ativa com bônus de XP..."`.
+  - Escuta convites em tempo real e aceita instantaneamente a melhor guilda (+2.5% XP).
+  - Detecta menções no chat para checagem imediata de convite.
+  - Opção de doação automática de ouro para subir o nível da guilda.
+- 🗺️ **Catálogo Completo Embutido:** 454 rotas/áreas de caça com níveis e tipos elementais calibrados.
+- ⚔️ **Caçada Automatizada:** Mantém o personagem caçando continuamente, responde aos eventos de visão (`view`), e recupera automaticamente de `hunt-cooldown` ou `field-lost`.
+- 🔴 **Auto-Catch Otimizado:** Lança Pokébolas instantaneamente em monstros derrotados (`pending`). Configurado para Ultra Ball (ID 3) em Shinies (Master Ball é bloqueada pelo jogo em Shinies).
+- 💖 **Auto-Heal (Nurse Joy):** Aciona cura automática instantânea (`joy-heal`) caso a vida da equipe caia abaixo do limite configurável (default 30%) ou após ser derrotado.
+- 🛒 **Auto-Buy de Pokébolas:** Reabastece Pokébolas via API HTTP caso o estoque caia abaixo do limite.
+- 💰 **Auto-Sell de Comuns/Duplicados:** Vende pokémons repetidos sem equipe via `/api/game/pokemon/sell`.
+- 🎁 **Coleta Diária:** Reivindica calendário diário e missões diárias de abate (`/api/game/daily`).
+- 📊 **Monitoramento em Tempo Real:** Terminal com estatísticas limpas (RAM, Kills, Capturas, Ouro, EXP/h) e Web Dashboard embutido (Porta 3001).
+- 🛡️ **Supervisor Anti-Crash:** Goroutines isoladas por conta com reconexão exponencial e proteção contra panic.
 
 ---
 
-## 📁 Estrutura do Projeto
+## 🚀 Como Configurar e Rodar
 
-```text
-pokeidle-go/
-├── accounts.example.json       # Modelo sanitizado de configuração
-├── accounts.json               # Suas credenciais reais (ignorado pelo git via .gitignore)
-├── main.go                     # Ponto de entrada do executável
-├── go.mod / go.sum             # Dependências Go nativas
-│
-├── docs/                       # 🌐 GITHUB PAGES (COMMAND CENTER AO VIVO)
-│   ├── index.html              # Dashboard Cyberpunk agregador
-│   └── status.json             # Telemetria em tempo real
-│
-├── pkg/
-│   ├── engine/                 # Motor supervisor, métricas e ciclo de vida
-│   ├── game/                   # Protocolo WebSocket do Pokéidle e regras de combate
-│   ├── twitch/                 # Lurker nativo Twitch IRC
-│   ├── kick/                   # Minerador nativo Kick WebSocket
-│   ├── network/                # Conexão WebSocket thread-safe e cliente HTTP
-│   └── auth/                   # Captura e renovação de tokens
-│
-└── scripts/
-    ├── build-linux.bat         # Compilação cruzada para Linux VPS
-    └── bot.service             # Template systemd para rodar como daemon na VPS
-```
+### 1. Configurar Conta
+Copie `accounts.example.json` para `accounts.json`:
 
----
-
-## 🚀 Como Executar
-
-### 1. Clonar e Configurar
-```bash
-git clone https://github.com/kbelludoo/pokeidle-go.git
-cd pokeidle-go
-cp accounts.example.json accounts.json
-```
-
-Edite o arquivo `accounts.json` com suas credenciais:
 ```json
 [
   {
     "id": "acc-1",
-    "name": "Seu Nick",
+    "name": "Meu Treinador",
     "enabled": true,
     "credentials": {
-      "token": "seu_token_pokeidle_aqui"
+      "token": "SEU_ACCESS_TOKEN_AQUI",
+      "refreshToken": ""
     },
     "settings": {
-      "huntTarget": "",
+      "huntTarget": "caterpie",
       "autoHunt": true,
-      "autoSell": true,
+      "autoCatch": true,
+      "ballId": 1,
+      "shinyBallId": 5,
+      "autoBuyBalls": true,
+      "minBalls": 20,
+      "buyBallQty": 50,
       "autoHeal": true,
+      "healThresholdHp": 30,
       "autoDaily": true,
-      "lure": 2
-    },
-    "twitch": {
-      "enabled": true,
-      "username": "seu_usuario_twitch",
-      "oauthToken": "oauth:seu_oauth_token_twitch"
-    },
-    "kick": {
-      "enabled": true,
-      "bearerToken": "seu_bearer_token_kick",
-      "streamers": ["tftoddy", "faasii", "axtlol", "xdaren_", "cogu"]
+      "autoSell": true
     }
   }
 ]
 ```
 
-### 2. Rodar no Windows
+#### 🔑 Como pegar seu Access Token:
+1. Abra o jogo [https://poke.idleworld.online/play](https://poke.idleworld.online/play) no seu navegador e faça login.
+2. Pressione **F12** (DevTools) e vá na aba **Console**.
+3. Digite e pressione Enter:
+   ```javascript
+   JSON.parse(sessionStorage.getItem("pokeweb:tokens")).accessToken
+   ```
+4. Copie o token retornado e cole no campo `"token"` do `accounts.json` (ou injete diretamente no Web Dashboard pelo botão **"🔑 Injetar Token"**).
+
+---
+
+### 2. Rodar Localmente (Windows)
+
 ```bash
 go run .
-# ou execute iniciar-bot.bat
+# ou execute o binário compilado:
+.\bot-poke.exe
 ```
 
-### 3. Compilar para Linux VPS
-No Windows:
+Acesse o painel web em: [http://localhost:3001](http://localhost:3001)
+
+---
+
+### 3. Deploy para Linux / VPS (Ubuntu)
+
+Compile o binário para Linux:
 ```cmd
-cmd /c "set GOOS=linux&& set GOARCH=amd64&& go build -ldflags=\"-s -w\" -o bot-poke-linux ."
+scripts\build-linux.bat
 ```
 
 Envie para a VPS:
 ```bash
-scp bot-poke-linux ubuntu@sua-vps-ip:/home/ubuntu/pokeidle-go/
+scp bot-poke-linux accounts.json ubuntu@IP_DA_VPS:/home/ubuntu/poke-bot/
+scp scripts/bot.service ubuntu@IP_DA_VPS:/etc/systemd/system/poke-bot.service
 ```
 
-Execute na VPS:
+Na VPS:
 ```bash
-chmod +x bot-poke-linux
-./bot-poke-linux
+sudo systemctl daemon-reload
+sudo systemctl enable poke-bot
+sudo systemctl start poke-bot
+sudo systemctl status poke-bot
 ```
-
----
-
-## 🔒 Segurança
-
-- O arquivo `accounts.json` e chaves privadas estão protegidos pelo `.gitignore` e **nunca** são enviados ao repositório público.
-- O executável não realiza polling abusivo e respeita os tempos de handshake exigidos pelos servidores da Twitch, Kick e Pokéidle.

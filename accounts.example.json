@@ -1,31 +1,32 @@
 [
   {
     "id": "acc-1",
-    "name": "Conta Principal",
+    "name": "Treinador Principal",
     "enabled": true,
+    "proxy": "",
+    "localIp": "",
     "credentials": {
       "email": "seu_email@exemplo.com",
       "password": "sua_senha",
-      "sessionCookie": "session_token_aqui_se_necessario",
-      "token": ""
+      "token": "",
+      "refreshToken": ""
     },
     "settings": {
-      "huntTarget": "",
+      "huntTarget": "auto",
+      "autoWeakness": true,
       "autoHunt": true,
-      "autoSell": true,
+      "autoCatch": true,
+      "ballId": 1,
+      "shinyBallId": 3,
+      "autoBuyBalls": true,
+      "minBalls": 20,
+      "buyBallQty": 50,
       "autoHeal": true,
+      "healThresholdHp": 30,
       "autoDaily": true,
-      "lure": 2
-    },
-    "twitch": {
-      "enabled": false,
-      "username": "seu_usuario_twitch",
-      "oauthToken": "oauth:obtenha_em_twitchapps_com_tmi"
-    },
-    "kick": {
-      "enabled": false,
-      "bearerToken": "seu_bearer_token_kick_aqui",
-      "streamers": ["tftoddy", "faasii", "axtlol", "xdaren_", "cogu"]
+      "autoSell": true,
+      "autoGuildAccept": true,
+      "autoGuildRecruit": true
     }
   }
 ]

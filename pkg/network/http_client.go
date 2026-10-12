@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -16,13 +18,38 @@ type HTTPClient struct {
 }
 
 func NewHTTPClient(baseURL string, timeout time.Duration) *HTTPClient {
+	return NewHTTPClientWithNetwork(baseURL, timeout, "", "")
+}
+
+func NewHTTPClientWithNetwork(baseURL string, timeout time.Duration, proxyURL, localAddr string) *HTTPClient {
 	if timeout <= 0 {
 		timeout = 15 * time.Second
 	}
+
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+	}
+
+	if proxyURL != "" {
+		if parsed, err := url.Parse(proxyURL); err == nil {
+			transport.Proxy = http.ProxyURL(parsed)
+		}
+	}
+
+	if localAddr != "" {
+		if ip := net.ParseIP(localAddr); ip != nil {
+			transport.DialContext = (&net.Dialer{
+				LocalAddr: &net.TCPAddr{IP: ip},
+				Timeout:   15 * time.Second,
+			}).DialContext
+		}
+	}
+
 	return &HTTPClient{
 		baseURL: baseURL,
 		client: &http.Client{
-			Timeout: timeout,
+			Timeout:   timeout,
+			Transport: transport,
 		},
 		headers: map[string]string{
 			"User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",

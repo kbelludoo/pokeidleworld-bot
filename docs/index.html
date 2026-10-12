@@ -632,31 +632,18 @@
           <div class="bot-header">
             <div class="bot-name-group">
               <h3>⚡ Pokéidle Go</h3>
-              <span class="bot-port" style="color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.25);">PORTA 3006 • GO NATIVE + TWITCH & KICK</span>
+              <span class="bot-port" style="color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.25);">PORTA 3001 • GO NATIVE</span>
             </div>
             <span class="badge-status badge-online" id="pokeidleBadge">1 CONTA ONLINE</span>
           </div>
 
           <div class="acc-list" id="pokeidleAccList">
-            <div class="acc-item">
-              <div class="acc-item-header">
-                <span class="acc-name">🌱 Bulbasaur (Lv. 12)</span>
-                <span class="acc-level" style="color: #38bdf8;">Área: Geodude</span>
-              </div>
-              <div class="stat-row">
-                <span>💰 322.8k gold</span>
-                <span>⚔️ 6 kills</span>
-              </div>
-              <div class="stat-row" style="margin-top: 4px; font-size: 0.7rem; color: var(--text-dim);">
-                <span>🟣 Twitch: +15% XP Ativo</span>
-                <span>🟢 Kick: 20 Pontos</span>
-              </div>
-            </div>
+            <div style="color: var(--text-muted); font-size: 0.8rem;">Carregando dados...</div>
           </div>
         </div>
 
         <div class="bot-footer">
-          <span style="font-size: 0.72rem; color: var(--text-dim);" id="pokeidleSummary">Consumo: ~2.4 MB RAM • Zero Navegadores</span>
+          <span style="font-size: 0.72rem; color: var(--text-dim);" id="pokeidleSummary">🎯 4.0x Dano • Auto-Guilda • Shinies</span>
           <a href="https://kbelludoo.github.io/pokeidle-go/" target="_blank" class="btn-link" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.08);">
             Abrir Dashboard Pokéidle ↗
           </a>
@@ -933,27 +920,31 @@
       const pAccounts = pStatus.accounts || [];
       const pokeidleAccList = document.getElementById('pokeidleAccList');
 
-      if (pAccounts.length > 0) {
-        pokeidleAccList.innerHTML = pAccounts.map(acc => {
-          return `
-            <div class="acc-item">
-              <div class="acc-item-header">
-                <span class="acc-name">🌱 ${acc.pokemon || 'Bulbasaur'} (Lv. ${acc.level || 12})</span>
-                <span class="acc-level" style="color: #38bdf8;">Área: ${acc.area || 'Geodude'}</span>
+      if (pokeidleAccList) {
+        if (pAccounts.length > 0) {
+          pokeidleAccList.innerHTML = pAccounts.map(acc => {
+            return `
+              <div class="acc-item">
+                <div class="acc-item-header">
+                  <span class="acc-name">🌱 ${acc.charName || 'kbelludoo'} (Lv. ${acc.level || 9})</span>
+                  <span class="acc-level" style="color: #38bdf8;">${acc.area || 'Geodude (4.0x Dano)'}</span>
+                </div>
+                <div class="stat-row">
+                  <span>🐾 ${acc.pokemon || 'Bulbasaur'}</span>
+                  <span>❤️ ${acc.hp || 168}/${acc.maxHp || 168} HP</span>
+                </div>
+                <div class="stat-row" style="margin-top: 4px; font-size: 0.7rem; color: var(--text-dim);">
+                  <span>🏰 ${acc.guild || 'Sem Guilda (Recrutando)'}</span>
+                  <span>⚔️ ${(acc.kills || 861).toLocaleString('pt-BR')} kills • 🔴 ${acc.captures || 1} caps</span>
+                </div>
               </div>
-              <div class="stat-row">
-                <span>💰 ${(acc.gold || 322800).toLocaleString('pt-BR')} gold</span>
-                <span>❤️ ${acc.hp || 252}/${acc.maxHp || 252} HP</span>
-              </div>
-              <div class="stat-row" style="margin-top: 4px; font-size: 0.7rem; color: var(--text-dim);">
-                <span>🟣 Twitch: ${acc.twitchBonus ? '+15% XP Ativo' : 'Conectado'}</span>
-                <span>🟢 Kick: ${acc.kickPoints || 20} Pontos</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-        document.getElementById('pokeidleBadge').textContent = `${pAccounts.length} CONTA ONLINE`;
-        document.getElementById('pokeidleSummary').textContent = `Consumo: ~${pStatus.ramMb || '2.4'} MB RAM • Zero Navegadores`;
+            `;
+          }).join('');
+          document.getElementById('pokeidleBadge').textContent = `${pAccounts.length} CONTA ONLINE`;
+          document.getElementById('pokeidleSummary').textContent = `Consumo: ~${pStatus.ramMb || '2.1'} MB RAM • Zero Navegadores`;
+        } else {
+          pokeidleAccList.innerHTML = `<div style="color: var(--yellow); font-size: 0.8rem;">Aguardando dados...</div>`;
+        }
       }
     }
 
