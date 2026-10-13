@@ -89,6 +89,7 @@ type Bot struct {
 	// Bestiário e Pokédex
 	pokedexSpecies     map[int]PokedexSpeciesEntry
 	lastPokedexCheckAt time.Time
+	bestiarySkips      map[int]bool
 
 	// Temporizadores e controle
 	lastFieldAt   time.Time
@@ -169,11 +170,13 @@ func NewBot(cfg AccountConfig) *Bot {
 		targetSlug:        cfg.Settings.HuntTarget,
 		ballCounts:        make(map[string]int),
 		pokedexSpecies:    make(map[int]PokedexSpeciesEntry),
+		bestiarySkips:     make(map[int]bool),
 		ticketChan:        make(chan string, 1),
 		disconnectCh:      make(chan error, 1),
 		nextRecruitPingAt: nextRecruitAt,
 	}
 }
+
 
 func (b *Bot) ID() string {
 	return b.config.ID
@@ -601,11 +604,40 @@ func (b *Bot) handleMessage(data []byte) {
 		})
 		b.mu.RLock()
 		s := b.socket
+		currentSlug := b.targetSlug
 		b.mu.RUnlock()
 		if s != nil {
 			_ = s.SendJSON(map[string]any{"type": "analyzer-get"})
 		}
-		if kCount > 0 && kCount%10 == 0 {
+
+		// Rastreia e atualiza localmente os abates da espécie caçada
+		hit100 := false
+		if currentSlug != "" {
+			spID := b.catalog.GetSpeciesIDByName(currentSlug)
+			if spID > 0 {
+				b.mu.Lock()
+				if b.pokedexSpecies == nil {
+					b.pokedexSpecies = make(map[int]PokedexSpeciesEntry)
+				}
+				entry := b.pokedexSpecies[spID]
+				entry.ID = spID
+				entry.Kills++
+				if entry.Kills >= 100 && !entry.Claimed {
+					entry.CanClaim = true
+					hit100 = true
+				}
+				b.pokedexSpecies[spID] = entry
+				curKills := entry.Kills
+				b.mu.Unlock()
+
+				b.updateStatus(func(st *engine.AccountStatus) {
+					st.Extra["pokedexKills"] = fmt.Sprintf("%d/100", curKills)
+				})
+			}
+		}
+
+		// Se atingiu a meta exata de 100 abates ou múltiplo de 10, consulta/resgata bônus na Pokédex
+		if hit100 || (kCount > 0 && kCount%10 == 0) {
 			go b.checkAndClaimPokedex()
 		}
 
@@ -995,12 +1027,66 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 		dexEntries[k] = v
 	}
 	pokedexMode := b.config.Settings.PokedexFarmMode
+	skips := make(map[int]bool)
+	for k, v := range b.bestiarySkips {
+		skips[k] = v
+	}
 	b.mu.RUnlock()
 
-	// Modo Auto-Fraqueza / Bestiário: busca rota ideal no catálogo com base nas fraquezas elementais, XP e Bestiário
-	bestHunt, offMult, risk, found := b.catalog.FindBestHunt(activeTypes, playerLevel, dexEntries, pokedexMode)
+	// Gera fila completa do Bestiário com base no catálogo e nas fraquezas elementais
+	fullQueue := b.catalog.GetBestiaryQueue(activeTypes, playerLevel, dexEntries)
+	totalAccessible := len(fullQueue)
+	totalCompleted := 0
+	for _, it := range fullQueue {
+		if it.Claimed || it.Kills >= 100 {
+			totalCompleted++
+		}
+	}
+
+	var bestHunt CatalogHunt
+	var offMult, risk float64
+	var found bool
+	var activeTarget *BestiaryQueueItem
+
+	if pokedexMode && len(fullQueue) > 0 {
+		// Seleciona o primeiro da fila que não esteja concluído e não tenha sido pulado
+		for _, it := range fullQueue {
+			if it.Score > 0 && !skips[it.SpeciesID] {
+				cpy := it
+				activeTarget = &cpy
+				break
+			}
+		}
+		// Se todos os pendentes foram pulados manualmente, reseta pulos e escolhe o topo
+		if activeTarget == nil {
+			for _, it := range fullQueue {
+				if it.Score > 0 {
+					cpy := it
+					activeTarget = &cpy
+					b.mu.Lock()
+					b.bestiarySkips = make(map[int]bool)
+					b.mu.Unlock()
+					break
+				}
+			}
+		}
+
+		if activeTarget != nil {
+			if h, ok := b.catalog.GetHunt(activeTarget.Slug); ok {
+				bestHunt = h
+				offMult = activeTarget.Offensive
+				risk = activeTarget.Risk
+				found = true
+			}
+		}
+	}
+
+	// Fallback para caçada de maior XP se não estiver em modo Bestiário ou todos já foram concluídos
 	if !found {
-		return
+		bestHunt, offMult, risk, found = b.catalog.FindBestHunt(activeTypes, playerLevel, dexEntries, false)
+		if !found {
+			return
+		}
 	}
 
 	targetTypes := b.catalog.GetHuntTypes(bestHunt.Slug)
@@ -1010,6 +1096,39 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	killsText := "0/100"
 	if entry, ok := dexEntries[targetSpID]; ok {
 		killsText = fmt.Sprintf("%d/100", entry.Kills)
+	}
+
+	// Fila dos próximos alvos do Bestiário para o painel web
+	var topQueue []BestiaryQueueItem
+	for _, it := range fullQueue {
+		if it.Score > 0 {
+			topQueue = append(topQueue, it)
+			if len(topQueue) >= 8 {
+				break
+			}
+		}
+	}
+
+	// Lista completa para o explorador de catálogo da Pokédex
+	var accessibleCatalog []map[string]any
+	for _, it := range fullQueue {
+		accessibleCatalog = append(accessibleCatalog, map[string]any{
+			"speciesId": it.SpeciesID,
+			"name":      it.Name,
+			"slug":      it.Slug,
+			"level":     it.Level,
+			"types":     it.Types,
+			"offensive": it.Offensive,
+			"kills":     it.Kills,
+			"claimed":   it.Claimed,
+			"canClaim":  it.CanClaim,
+			"remaining": it.Remaining,
+		})
+	}
+
+	pct := 0.0
+	if totalAccessible > 0 {
+		pct = (float64(totalCompleted) * 100.0) / float64(totalAccessible)
 	}
 
 	b.mu.Lock()
@@ -1030,6 +1149,27 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 		st.Extra["matchup"] = fmt.Sprintf("%.1fx Dano", offMult)
 		st.Extra["matchupDetail"] = desc
 		st.Extra["enemyTypes"] = strings.Join(targetTypes, " / ")
+		st.Extra["pokedexFarmMode"] = pokedexMode
+		st.Extra["pokedexTotalCompleted"] = totalCompleted
+		st.Extra["pokedexTotalAccessible"] = totalAccessible
+		st.Extra["pokedexPercent"] = fmt.Sprintf("%.1f%%", pct)
+		st.Extra["pokedexQueue"] = topQueue
+		st.Extra["pokedexCatalog"] = accessibleCatalog
+		if activeTarget != nil {
+			st.Extra["pokedexCurrentTarget"] = map[string]any{
+				"speciesId":   activeTarget.SpeciesID,
+				"name":        activeTarget.Name,
+				"slug":        activeTarget.Slug,
+				"level":       activeTarget.Level,
+				"types":       activeTarget.Types,
+				"offensive":   activeTarget.Offensive,
+				"kills":       activeTarget.Kills,
+				"remaining":   activeTarget.Remaining,
+				"targetKills": 100,
+				"percent":     min(100, activeTarget.Kills),
+				"claimed":     activeTarget.Claimed,
+			}
+		}
 	})
 
 	if slugChanged || forceEnter {
@@ -1213,9 +1353,9 @@ func (b *Bot) checkAndClaimPokedex() bool {
 		}
 	})
 
-	// Se resgatou bônus e o modo Bestiário estiver ativo, re-avalia rota imediatamente
-	if claimedAny && b.config.Settings.PokedexFarmMode {
-		b.evaluateAndSwitchWeaknessHunt(false)
+	// Se resgatou bônus ou se o modo Bestiário estiver ativo, re-avalia rota e atualiza status
+	if b.config.Settings.PokedexFarmMode {
+		b.evaluateAndSwitchWeaknessHunt(claimedAny)
 	}
 
 	return claimedAny
@@ -1491,6 +1631,30 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 		}
 		b.appendLogLocked(fmt.Sprintf("Modo Foco em Bestiário alterado para: %s", modeStr))
 		return fmt.Sprintf("Modo Bestiário alterado para %s!", modeStr), nil
+
+	case "skipBestiaryTarget", "bestiaryNext":
+		currentSpID := b.catalog.GetSpeciesIDByName(b.targetSlug)
+		if currentSpID > 0 {
+			if b.bestiarySkips == nil {
+				b.bestiarySkips = make(map[int]bool)
+			}
+			b.bestiarySkips[currentSpID] = true
+			spInfo, _ := b.catalog.GetSpeciesByID(currentSpID)
+			name := spInfo.Name
+			if name == "" {
+				name = b.targetSlug
+			}
+			b.appendLogLocked(fmt.Sprintf("⏩ [Bestiário] Alvo %s pulado manualmente. Rotacionando para o próximo monstro...", name))
+			go b.evaluateAndSwitchWeaknessHunt(true)
+			return fmt.Sprintf("Alvo %s pulado! Indo para o próximo...", name), nil
+		}
+		return nil, fmt.Errorf("nenhum alvo ativo para pular")
+
+	case "resetBestiarySkips":
+		b.bestiarySkips = make(map[int]bool)
+		b.appendLogLocked("🔄 [Bestiário] Pulos manuais resetados. Fila normal restabelecida.")
+		go b.evaluateAndSwitchWeaknessHunt(true)
+		return "Fila do Bestiário reiniciada com sucesso!", nil
 
 	default:
 		return nil, fmt.Errorf("ação desconhecida: %s", action)

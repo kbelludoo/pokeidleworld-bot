@@ -96,11 +96,13 @@ func main() {
 		}
 	}()
 
-	// 3. Monitor no Terminal (atualiza a cada 4 segundos com estatísticas de RAM)
+	// 3. Monitor no Terminal (atualiza a cada 4 segundos com estatísticas de RAM) e Sync para docs/status.json
 	go func() {
 		time.Sleep(2 * time.Second)
 		ticker := time.NewTicker(4 * time.Second)
 		defer ticker.Stop()
+		var lastStatusDump time.Time
+		startAt := time.Now()
 
 		for {
 			select {
@@ -122,6 +124,21 @@ func main() {
 					totalKills += st.Kills
 					if st.Status == "hunting" {
 						huntingCount++
+					}
+				}
+
+				// Salva status.json a cada 15 segundos para GitHub Pages e telemetria local
+				if time.Since(lastStatusDump) >= 15*time.Second {
+					lastStatusDump = time.Now()
+					dumpData := map[string]any{
+						"uptime":     time.Since(startAt).Round(time.Second).String(),
+						"goroutines": runtime.NumGoroutine(),
+						"ramAllocMB": allocMB,
+						"ramSysMB":   sysMB,
+						"accounts":   statuses,
+					}
+					if raw, err := json.MarshalIndent(dumpData, "", "  "); err == nil {
+						_ = os.WriteFile("docs/status.json", raw, 0644)
 					}
 				}
 
@@ -161,7 +178,13 @@ func main() {
 							fmt.Printf("  Área de Caça: %s | EXP/H: %.0f | Duração: %ds\n", st.CurrentArea, st.ExpPerHour, st.DurationSec)
 						}
 					}
-					if dexKills, ok := st.Extra["pokedexKills"].(string); ok && dexKills != "" {
+					if completed, ok := st.Extra["pokedexTotalCompleted"].(int); ok {
+						accessible, _ := st.Extra["pokedexTotalAccessible"].(int)
+						pct, _ := st.Extra["pokedexPercent"].(string)
+						dexKills, _ := st.Extra["pokedexKills"].(string)
+						fmt.Printf("  📖 Bestiário Completo: %d/%d espécies concluídas (%s) | Alvo Atual: %s (%s)\n",
+							completed, accessible, pct, st.CurrentArea, dexKills)
+					} else if dexKills, ok := st.Extra["pokedexKills"].(string); ok && dexKills != "" {
 						fmt.Printf("  📖 Bestiário: %s abates (Meta: 100 abates p/ +25%% XP)\n", dexKills)
 					}
 					fmt.Println("--------------------------------------------------------------------------------")

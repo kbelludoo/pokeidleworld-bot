@@ -21,6 +21,7 @@
       --accent-yellow: #facc15;
       --accent-green: #22c55e;
       --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
       
       /* Cores de Tipos Pokémon */
       --type-grass: #4ade80;
@@ -30,6 +31,16 @@
       --type-fire: #f97316;
       --type-water: #38bdf8;
       --type-electric: #facc15;
+      --type-bug: #84cc16;
+      --type-normal: #94a3b8;
+      --type-flying: #60a5fa;
+      --type-psychic: #ec4899;
+      --type-ghost: #7c3aed;
+      --type-dragon: #6366f1;
+      --type-ice: #67e8f9;
+      --type-fighting: #b91c1c;
+      --type-steel: #94a3b8;
+      --type-fairy: #f472b6;
       
       --text: #f8fafc;
       --text-muted: #94a3b8;
@@ -41,6 +52,7 @@
       background-image: 
         radial-gradient(circle at 10% 20%, rgba(239, 68, 68, 0.08) 0%, transparent 35%),
         radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
         linear-gradient(to bottom, #07090e, #0b1120);
       color: var(--text);
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
@@ -235,6 +247,11 @@
     .type-poison { background: #a855f7; }
     .type-rock { background: #ca8a04; }
     .type-ground { background: #d97706; }
+    .type-water { background: #38bdf8; color: #082f49; }
+    .type-fire { background: #f97316; }
+    .type-bug { background: #84cc16; color: #1a2e05; }
+    .type-normal { background: #94a3b8; color: #0f172a; }
+    .type-flying { background: #60a5fa; }
 
     .vs-badge {
       display: flex;
@@ -294,6 +311,208 @@
       font-weight: 800;
       margin-top: 6px;
       font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ========================================================
+       MODO COMPLETO DO BESTIÁRIO (POKÉDEX HUNTER 24/7)
+       ======================================================== */
+    .bestiary-card {
+      background: linear-gradient(145deg, rgba(6, 78, 59, 0.22) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px -10px rgba(5, 150, 105, 0.25);
+    }
+    .bestiary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .bestiary-title h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bestiary-title p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    .badge-dex-mode {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .badge-dex-mode:hover {
+      background: rgba(16, 185, 129, 0.3);
+      transform: translateY(-1px);
+    }
+    .bar-fill-dex {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+      transition: width 0.4s ease;
+    }
+    .bar-fill-target {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #10b981);
+      transition: width 0.3s ease;
+    }
+
+    /* ALVO ATUAL DO BESTIÁRIO */
+    .bestiary-target-box {
+      background: rgba(2, 6, 23, 0.75);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: 14px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 110px 1fr auto;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 768px) {
+      .bestiary-target-box { grid-template-columns: 1fr; text-align: center; }
+      .bestiary-target-box .target-actions { justify-content: center; }
+    }
+    .target-art {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+      margin: 0 auto;
+    }
+    .target-info h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .target-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0 12px 0;
+      flex-wrap: wrap;
+    }
+    .badge-remaining {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #facc15;
+      background: rgba(250, 204, 21, 0.12);
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    /* FILA DE PRÓXIMOS ALVOS */
+    .queue-section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .queue-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .queue-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .queue-card:hover {
+      transform: translateY(-2px);
+      border-color: #34d399;
+    }
+    .queue-sprite {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+    .queue-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .queue-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #f8fafc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .queue-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* EXPLORADOR DE CATÁLOGO */
+    .catalog-container {
+      margin-top: 16px;
+      border-top: 1px solid rgba(51, 65, 85, 0.6);
+      padding-top: 16px;
+    }
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-top: 12px;
+    }
+    .catalog-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+    }
+    .catalog-item.completed {
+      border-color: rgba(34, 197, 94, 0.5);
+      background: rgba(34, 197, 94, 0.08);
+    }
+    .catalog-item.hunting {
+      border-color: rgba(250, 204, 21, 0.6);
+      background: rgba(250, 204, 21, 0.1);
     }
 
     /* MAIN ACCOUNT DASHBOARD */
@@ -452,7 +671,7 @@
         <div class="pokeball-icon"></div>
         <div class="brand-title">
           <h1>⚡ POKE IDLE WORLD</h1>
-          <p>Painel Autônomo de Caça, Fraquezas Elementais & Guilda 24/7</p>
+          <p>Painel Autônomo de Caça, Fraquezas Elementais & Modo Completo do Bestiário 24/7</p>
         </div>
       </div>
       <div class="header-actions">
@@ -482,20 +701,20 @@
 
       <div class="vs-badge">
         <span class="vs-text">VANTAGEM</span>
-        <span class="mult-val" id="heroMultiplier">4.0x</span>
-        <span class="mult-sub">Fraqueza Dupla!</span>
+        <span class="mult-val" id="heroMultiplier">2.0x</span>
+        <span class="mult-sub">Fraqueza Elemental</span>
       </div>
 
       <div class="poke-side" style="justify-content: flex-end;">
         <div class="poke-info" style="text-align: right;">
-          <div class="role">🎯 Alvo Atual da Rota</div>
-          <h3 id="targetPokeName">Geodude</h3>
+          <div class="role">🎯 Rota Atual de Caça</div>
+          <h3 id="targetPokeName">Shellder</h3>
           <div style="margin-top: 6px;">
-            <span class="type-pill type-rock" id="targetType1">ROCK</span>
-            <span class="type-pill type-ground" id="targetType2">GROUND</span>
+            <span class="type-pill type-water" id="targetType1">WATER</span>
+            <span class="type-pill type-ground" id="targetType2" style="display:none;"></span>
           </div>
         </div>
-        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png" alt="Geodude" class="poke-art" id="targetPokeImg">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/90.png" alt="Shellder" class="poke-art" id="targetPokeImg">
       </div>
     </section>
 
@@ -523,12 +742,102 @@
       </div>
     </div>
 
+    <!-- ========================================================
+         MODO COMPLETO DO BESTIÁRIO (POKÉDEX HUNTER 24/7)
+         ======================================================== -->
+    <section class="bestiary-card">
+      <div class="bestiary-header">
+        <div class="bestiary-title">
+          <h2>📖 Modo Completo do Bestiário (Auto-Rotação 100 Abates)</h2>
+          <p>O bot caça automaticamente 100 monstros de cada espécie acessível, reivindica o bônus de +25% de XP na Pokédex e rotaciona para o próximo alvo com fraqueza!</p>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <span class="badge-dex-mode" id="dexModeBadge" onclick="dispatchAction('togglePokedex')">
+            <span class="status-dot"></span>
+            <span id="dexModeText">MODO BESTIÁRIO ATIVO</span>
+          </span>
+          <button class="btn btn-green" onclick="dispatchAction('claimPokedex')" style="padding: 6px 12px; font-size: 0.75rem;">🎁 Resgatar Pokédex</button>
+          <button class="btn" onclick="dispatchAction('skipBestiaryTarget')" style="padding: 6px 12px; font-size: 0.75rem;">⏩ Pular Monstro</button>
+          <button class="btn" onclick="dispatchAction('resetBestiarySkips')" style="padding: 6px 12px; font-size: 0.75rem;">🔁 Resetar Pulos</button>
+        </div>
+      </div>
+
+      <!-- BARRA DE PROGRESSO GERAL DA POKÉDEX -->
+      <div class="bar-wrap" style="margin-bottom: 20px;">
+        <div class="bar-head">
+          <span>🏆 Progresso Geral do Bestiário (Espécies Desbloqueadas)</span>
+          <span id="dexProgressOverview">1 / 71 Concluídos (1.4%)</span>
+        </div>
+        <div class="bar-track" style="height: 12px;">
+          <div class="bar-fill-dex" id="dexTotalBarFill" style="width: 1.4%;"></div>
+        </div>
+      </div>
+
+      <!-- ALVO ATUAL DO BESTIÁRIO (EM DESTAQUE) -->
+      <div class="bestiary-target-box">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/90.png" alt="Target" class="target-art" id="dtTargetArt">
+        <div class="target-info">
+          <h3>
+            <span id="dtTargetName">Shellder</span>
+            <span class="level-badge" id="dtTargetLevel">Nv. 10</span>
+          </h3>
+          <div class="target-meta">
+            <span id="dtTargetTypesContainer">
+              <span class="type-pill type-water">WATER</span>
+            </span>
+            <span class="type-pill" style="background:#0284c7;" id="dtTargetMatchup">2.0x Dano</span>
+            <span class="badge-remaining" id="dtTargetRemaining">⚡ Faltam 59 abates para +25% XP!</span>
+          </div>
+          <div class="bar-wrap" style="margin-bottom: 0;">
+            <div class="bar-head" style="font-size: 0.75rem; margin-bottom: 4px;">
+              <span>🎯 Abates da Espécie Atual</span>
+              <span id="dtKillsProgressText">41 / 100 abates (41%)</span>
+            </div>
+            <div class="bar-track" style="height: 10px;">
+              <div class="bar-fill-target" id="dtKillsBarFill" style="width: 41%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="target-actions" style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="btn btn-green" onclick="dispatchAction('claimPokedex')">🎁 Resgatar +25% XP</button>
+          <button class="btn" onclick="dispatchAction('skipBestiaryTarget')">⏩ Pular Monstro</button>
+          <button class="btn" onclick="dispatchAction('togglePokedex')">🔄 Alternar Modo</button>
+        </div>
+      </div>
+
+      <!-- FILA DE PRÓXIMOS ALVOS (CALCULADA PELA IA) -->
+      <div class="queue-section-title">
+        <span>⚡ Próximos Alvos na Fila de Caça (Ordenados por Fraqueza e XP):</span>
+      </div>
+      <div class="queue-grid" id="dexQueueContainer">
+        <!-- Renderizado dinamicamente via JS -->
+      </div>
+
+      <!-- EXPLORADOR / CATÁLOGO DO BESTIÁRIO -->
+      <div class="catalog-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <button class="btn" id="btnToggleCatalog" onclick="toggleCatalogCollapse()">
+            📋 Ver Catálogo Completo (<span id="catTotalCount">71</span> Espécies) ▼
+          </button>
+          <div style="display: flex; gap: 8px;" id="catFilterButtons">
+            <button class="btn btn-primary" id="btnFilterAll" style="padding: 4px 10px; font-size: 0.72rem;" onclick="setCatalogFilter('all')">Todos (<span id="catCountAll">71</span>)</button>
+            <button class="btn" id="btnFilterPending" style="padding: 4px 10px; font-size: 0.72rem;" onclick="setCatalogFilter('pending')">Pendentes (<span id="catCountPending">70</span>)</button>
+            <button class="btn" id="btnFilterCompleted" style="padding: 4px 10px; font-size: 0.72rem;" onclick="setCatalogFilter('completed')">Concluídos (<span id="catCountCompleted">1</span>)</button>
+          </div>
+        </div>
+        <div id="catalogCollapseBox" style="display: none; margin-top: 12px;">
+          <input type="text" id="catalogSearchInput" placeholder="🔍 Filtrar espécies por nome..." oninput="renderCatalogList()" style="width: 100%; background: #020617; border: 1px solid var(--card-border); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.8rem; margin-bottom: 10px;">
+          <div class="catalog-grid" id="catalogGrid"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- MAIN TRAINER DASHBOARD -->
     <div class="dashboard-card">
       <div class="acc-header">
         <div class="trainer-title">
           <span>🧢 Treinador: <b id="trainerNick" style="color:#38bdf8;">Treinador #1</b></span>
-          <span class="level-badge" id="trainerLevel">Lv. 19</span>
+          <span class="level-badge" id="trainerLevel">Lv. 22</span>
         </div>
         <span class="badge-status" id="huntStatusBadge">⚔️ Caçando Ativamente</span>
       </div>
@@ -541,19 +850,7 @@
           <span class="level-badge" id="guildBonusText" style="background:#7c3aed; color:#fff; border:none;">+2.5% XP Alvo</span>
         </div>
         <div class="guild-countdown" id="guildRecruitCountdown">
-          📢 Próximo Anúncio no Chat: sorteado em 1h 15m
-        </div>
-      </div>
-
-      <!-- POKEDEX BESTIARY PROGRESS BANNER -->
-      <div class="guild-banner" style="background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3); margin-bottom: 16px;">
-        <div class="guild-title">
-          <span>📖 Bestiário (Pokédex):</span>
-          <span id="pokedexKillsText" style="color: #34d399; font-weight: 700;">Progresso da Rota: 0 / 100</span>
-          <span class="level-badge" id="pokedexBadge" style="background:#059669; color:#fff; border:none;">🎁 Meta: +25% XP</span>
-        </div>
-        <div class="guild-countdown" style="color: #6ee7b7;" id="pokedexSubText">
-          Auto-rotação ativa: ao completar 100 abates, resgata +25% de nível e troca para o próximo monstro com fraqueza!
+          📢 Próximo Anúncio no Chat: sorteado entre 2h e 8h
         </div>
       </div>
 
@@ -561,7 +858,7 @@
       <div class="bar-wrap">
         <div class="bar-head">
           <span>❤️ Vida da Equipe (HP)</span>
-          <span id="hpText">348 / 348 (100%)</span>
+          <span id="hpText">384 / 384 (100%)</span>
         </div>
         <div class="bar-track">
           <div class="bar-fill-hp" id="hpBarFill" style="width: 100%;"></div>
@@ -574,6 +871,7 @@
         <button class="btn btn-green" onclick="dispatchAction('joyHeal')">💖 Nurse Joy (Curar Equipe)</button>
         <button class="btn btn-green" onclick="dispatchAction('claimPokedex')">📖 Resgatar Pokédex (+25% XP)</button>
         <button class="btn" onclick="dispatchAction('togglePokedex')">🔄 Foco Bestiário (ON/OFF)</button>
+        <button class="btn" onclick="dispatchAction('skipBestiaryTarget')">⏩ Pular Alvo do Bestiário</button>
         <button class="btn" onclick="dispatchAction('toggleWeakness')">🎯 Auto-Fraqueza (4.0x)</button>
         <button class="btn" onclick="dispatchAction('autoCatch')">🔴 Auto-Catch (Pokébolas)</button>
         <button class="btn btn-purple" onclick="dispatchAction('guildRecruit')">📢 Divulgar no Chat (Help)</button>
@@ -607,34 +905,19 @@
 
   <script>
     let activeApiBase = '';
+    let currentCatalog = [];
+    let currentFilter = 'all';
+    let catalogExpanded = false;
 
-    const POKE_IMAGES = {
-      bulbasaur: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png',
-      ivysaur: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/2.png',
-      venusaur: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png',
-      charmander: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png',
-      charizard: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png',
-      squirtle: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png',
-      blastoise: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png',
-      caterpie: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10.png',
-      pikachu: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png',
-      diglett: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/50.png',
-      psyduck: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/54.png',
-      geodude: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png',
-      graveler: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/75.png',
-      golem: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png',
-      slowpoke: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/79.png',
-      shellder: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/90.png',
-      krabby: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/98.png',
-      horsea: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/116.png',
-      goldeen: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/118.png',
-      staryu: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/120.png',
-      omanyte: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/138.png',
-      kabuto: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/140.png',
-      wooper: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/194.png',
-      remoraid: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/223.png',
-      chinchou: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/170.png'
-    };
+    function getPokeArtwork(id) {
+      if (!id || id <= 0) id = 1;
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+    }
+
+    function getPokeSprite(id) {
+      if (!id || id <= 0) id = 1;
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+    }
 
     function copyBookmarklet() {
       const code = `javascript:(function(){let r=sessionStorage.getItem("pokeweb:tokens")||localStorage.getItem("pokeweb:tokens");if(!r){alert("Entre no jogo poke.idleworld.online primeiro!");return;}let t=JSON.parse(r).accessToken;prompt("Copie seu Access Token:",t);})();`;
@@ -706,6 +989,68 @@
       return null;
     }
 
+    function toggleCatalogCollapse() {
+      catalogExpanded = !catalogExpanded;
+      const box = document.getElementById('catalogCollapseBox');
+      const btn = document.getElementById('btnToggleCatalog');
+      if (catalogExpanded) {
+        box.style.display = 'block';
+        btn.textContent = `📋 Ocultar Catálogo do Bestiário ▲`;
+        renderCatalogList();
+      } else {
+        box.style.display = 'none';
+        btn.textContent = `📋 Ver Catálogo Completo (${currentCatalog.length} Espécies) ▼`;
+      }
+    }
+
+    function setCatalogFilter(filter) {
+      currentFilter = filter;
+      document.getElementById('btnFilterAll').className = filter === 'all' ? 'btn btn-primary' : 'btn';
+      document.getElementById('btnFilterPending').className = filter === 'pending' ? 'btn btn-primary' : 'btn';
+      document.getElementById('btnFilterCompleted').className = filter === 'completed' ? 'btn btn-primary' : 'btn';
+      renderCatalogList();
+    }
+
+    function renderCatalogList() {
+      const container = document.getElementById('catalogGrid');
+      if (!container) return;
+      const search = (document.getElementById('catalogSearchInput').value || '').trim().toLowerCase();
+
+      let list = currentCatalog.filter(it => {
+        if (search && !it.name.toLowerCase().includes(search) && !it.slug.toLowerCase().includes(search)) {
+          return false;
+        }
+        const isComp = it.claimed || it.kills >= 100;
+        if (currentFilter === 'pending' && isComp) return false;
+        if (currentFilter === 'completed' && !isComp) return false;
+        return true;
+      });
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Nenhuma espécie encontrada para este filtro.</div>';
+        return;
+      }
+
+      container.innerHTML = list.map(it => {
+        const isComp = it.claimed || it.kills >= 100;
+        const cls = isComp ? 'catalog-item completed' : (it.kills > 0 ? 'catalog-item hunting' : 'catalog-item');
+        const badgeText = isComp ? '<span style="color:#22c55e; font-weight:bold;">Concluído ✓</span>' : `${it.kills}/100 abates`;
+        const weakness = it.offensive ? `<span style="color:#facc15;">${it.offensive.toFixed(1)}x</span>` : '';
+        return `
+          <div class="${cls}">
+            <img src="${getPokeSprite(it.speciesId)}" alt="${it.name}" class="queue-sprite">
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.name} <small style="color:var(--text-muted);">Lv.${it.level}</small></div>
+              <div style="color:var(--text-muted); font-size:0.7rem; display:flex; justify-content:space-between; margin-top:2px;">
+                <span>${badgeText}</span>
+                ${weakness}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     async function updateData() {
       try {
         const data = await fetchStatus();
@@ -721,54 +1066,27 @@
         document.getElementById('expRateVal').textContent = Math.round(acc.expPerHour || 0).toLocaleString() + ' EXP/h';
 
         document.getElementById('trainerNick').textContent = acc.name || 'Treinador #1';
-        document.getElementById('trainerLevel').textContent = 'Lv. ' + (acc.level || extra.pokemonLevel || 19);
+        document.getElementById('trainerLevel').textContent = 'Lv. ' + (acc.level || extra.pokemonLevel || 22);
 
         // Pokémon ativo
         const pName = extra.activePokemon || 'Bulbasaur';
         document.getElementById('heroPokeName').textContent = pName;
-        const pSlug = pName.toLowerCase();
-        if (POKE_IMAGES[pSlug]) {
-          document.getElementById('activePokeImg').src = POKE_IMAGES[pSlug];
-        }
+        document.getElementById('activePokeImg').src = getPokeArtwork(1); // Bulbasaur #1
 
-        // Alvo
-        const targetSlug = (extra.slug || acc.currentArea || 'geodude').toLowerCase();
+        // Alvo e fraqueza
+        const targetSlug = (extra.slug || acc.currentArea || 'shellder').toLowerCase();
         document.getElementById('targetPokeName').textContent = targetSlug.charAt(0).toUpperCase() + targetSlug.slice(1);
-        if (POKE_IMAGES[targetSlug]) {
-          document.getElementById('targetPokeImg').src = POKE_IMAGES[targetSlug];
-        }
-
-        // Multiplicador & Detalhes de Eficiência
-        document.getElementById('heroMultiplier').textContent = extra.matchup || '2.0x';
+        
+        // Multiplicador & Detalhes
+        document.getElementById('heroMultiplier').textContent = extra.matchup || '2.0x Dano';
         const multSub = document.querySelector('.mult-sub');
         if (multSub) {
-          multSub.textContent = extra.matchupDetail || 'Alta Eficiência de XP';
-        }
-
-        // Tipos do Alvo
-        if (extra.enemyTypes) {
-          const types = extra.enemyTypes.split('/').map(t => t.trim().toUpperCase());
-          const t1 = document.getElementById('targetType1');
-          const t2 = document.getElementById('targetType2');
-          if (t1 && types[0]) {
-            t1.textContent = types[0];
-            t1.className = 'type-pill type-' + types[0].toLowerCase();
-            t1.style.display = 'inline-block';
-          }
-          if (t2) {
-            if (types[1]) {
-              t2.textContent = types[1];
-              t2.className = 'type-pill type-' + types[1].toLowerCase();
-              t2.style.display = 'inline-block';
-            } else {
-              t2.style.display = 'none';
-            }
-          }
+          multSub.textContent = extra.matchupDetail || 'Fraqueza Elemental';
         }
 
         // HP
-        const hp = acc.hp || 348;
-        const maxHp = acc.maxHp || 348;
+        const hp = acc.hp || 384;
+        const maxHp = acc.maxHp || 384;
         const hpPct = maxHp > 0 ? Math.min(100, Math.round((hp / maxHp) * 100)) : 100;
         document.getElementById('hpText').textContent = `${hp} / ${maxHp} (${hpPct}%)`;
         document.getElementById('hpBarFill').style.width = hpPct + '%';
@@ -781,15 +1099,100 @@
           document.getElementById('guildRecruitCountdown').textContent = `📢 Próximo Anúncio no Chat: sorteado em ${extra.nextRecruit}`;
         }
 
-        // Bestiário (Pokédex)
-        const dexText = document.getElementById('pokedexKillsText');
-        if (dexText) {
-          const kills = extra.pokedexKills || '0/100';
-          const area = acc.currentArea || 'Rota Atual';
-          dexText.textContent = `${area}: ${kills} abates`;
-          const badge = document.getElementById('pokedexBadge');
-          if (badge) {
-            badge.textContent = extra.pokedexClaimed ? '✓ Bônus 25% Já Resgatado' : '🎁 Meta: 100 abates (+25% XP)';
+        // ========================================================
+        // MODO COMPLETO DO BESTIÁRIO
+        // ========================================================
+        const isDexMode = extra.pokedexFarmMode !== false;
+        const dexModeBadge = document.getElementById('dexModeBadge');
+        const dexModeText = document.getElementById('dexModeText');
+        if (dexModeBadge && dexModeText) {
+          if (isDexMode) {
+            dexModeText.textContent = 'MODO BESTIÁRIO ATIVO';
+            dexModeBadge.style.borderColor = 'rgba(16, 185, 129, 0.45)';
+            dexModeBadge.style.color = '#34d399';
+          } else {
+            dexModeText.textContent = 'MODO MANUAL (XP PURO)';
+            dexModeBadge.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+            dexModeBadge.style.color = '#94a3b8';
+          }
+        }
+
+        // Progresso Geral da Pokédex
+        const completed = extra.pokedexTotalCompleted || 1;
+        const accessible = extra.pokedexTotalAccessible || 71;
+        const pct = extra.pokedexPercent || ((completed * 100) / accessible).toFixed(1) + '%';
+        document.getElementById('dexProgressOverview').textContent = `${completed} / ${accessible} Concluídos (${pct})`;
+        document.getElementById('dexTotalBarFill').style.width = pct;
+
+        // Alvo Atual do Bestiário
+        const curTarget = extra.pokedexCurrentTarget || {
+          speciesId: 90,
+          name: 'Shellder',
+          level: 10,
+          types: ['WATER'],
+          offensive: 2.0,
+          kills: 41,
+          remaining: 59,
+          percent: 41
+        };
+
+        document.getElementById('dtTargetName').textContent = curTarget.name;
+        document.getElementById('dtTargetLevel').textContent = `Nv. ${curTarget.level}`;
+        document.getElementById('dtTargetArt').src = getPokeArtwork(curTarget.speciesId);
+        document.getElementById('targetPokeImg').src = getPokeArtwork(curTarget.speciesId);
+        
+        if (curTarget.offensive) {
+          document.getElementById('dtTargetMatchup').textContent = `${curTarget.offensive.toFixed(1)}x Dano`;
+        }
+
+        const remainingKills = curTarget.remaining != null ? curTarget.remaining : Math.max(0, 100 - (curTarget.kills || 0));
+        document.getElementById('dtTargetRemaining').textContent = `⚡ Faltam ${remainingKills} abates para +25% XP!`;
+        const killsPct = Math.min(100, curTarget.percent != null ? curTarget.percent : (curTarget.kills || 0));
+        document.getElementById('dtKillsProgressText').textContent = `${curTarget.kills || 0} / 100 abates (${killsPct}%)`;
+        document.getElementById('dtKillsBarFill').style.width = killsPct + '%';
+
+        // Tipos do Alvo
+        if (curTarget.types && curTarget.types.length > 0) {
+          document.getElementById('dtTargetTypesContainer').innerHTML = curTarget.types.map(t => {
+            return `<span class="type-pill type-${t.toLowerCase()}">${t.toUpperCase()}</span>`;
+          }).join('');
+        }
+
+        // Fila dos Próximos Alvos
+        const queue = extra.pokedexQueue || [];
+        const queueBox = document.getElementById('dexQueueContainer');
+        if (queueBox) {
+          if (queue.length === 0) {
+            queueBox.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; padding:10px;">Todas as espécies acessíveis até este nível já foram concluídas no Bestiário!</div>';
+          } else {
+            queueBox.innerHTML = queue.slice(0, 6).map((q, idx) => {
+              const rem = q.remaining != null ? q.remaining : Math.max(0, 100 - q.kills);
+              return `
+                <div class="queue-card">
+                  <img src="${getPokeSprite(q.speciesId)}" alt="${q.name}" class="queue-sprite">
+                  <div class="queue-details">
+                    <div class="queue-name">#${idx + 1} ${q.name} <small style="color:var(--text-muted);">Lv.${q.level}</small></div>
+                    <div class="queue-sub">
+                      <span style="color:#facc15; font-weight:700;">${q.offensive ? q.offensive.toFixed(1) + 'x Dano' : ''}</span>
+                      <span>${q.kills}/100 (Faltam ${rem})</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        // Catálogo de Espécies Acessíveis
+        if (extra.pokedexCatalog && extra.pokedexCatalog.length > 0) {
+          currentCatalog = extra.pokedexCatalog;
+          document.getElementById('catTotalCount').textContent = currentCatalog.length;
+          document.getElementById('catCountAll').textContent = currentCatalog.length;
+          const compCount = currentCatalog.filter(c => c.claimed || c.kills >= 100).length;
+          document.getElementById('catCountCompleted').textContent = compCount;
+          document.getElementById('catCountPending').textContent = currentCatalog.length - compCount;
+          if (catalogExpanded) {
+            renderCatalogList();
           }
         }
 
@@ -818,7 +1221,7 @@
           alert('Aviso: ' + (d.error || 'Erro'));
         }
       } catch (err) {
-        alert('Não foi possível conectar ao bot local em http://localhost:3001.');
+        alert('Não foi possível conectar ao bot local em http://localhost:3001. Verifique se o bot-poke.exe está em execução.');
       }
     }
 

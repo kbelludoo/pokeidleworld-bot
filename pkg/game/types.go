@@ -401,3 +401,19 @@ type PokedexClaimResponse struct {
 	Level     int   `json:"level"`
 	TotalXP   int64 `json:"totalXp"`
 }
+
+type BestiaryQueueItem struct {
+	SpeciesID   int      `json:"speciesId"`
+	Name        string   `json:"name"`
+	Slug        string   `json:"slug"`
+	Level       int      `json:"level"`
+	Types       []string `json:"types"`
+	Offensive   float64  `json:"offensive"`
+	Risk        float64  `json:"risk"`
+	Kills       int      `json:"kills"`
+	TargetKills int      `json:"targetKills"`
+	Remaining   int      `json:"remaining"`
+	Claimed     bool     `json:"claimed"`
+	CanClaim    bool     `json:"canClaim"`
+	Score       float64  `json:"score"`
+}

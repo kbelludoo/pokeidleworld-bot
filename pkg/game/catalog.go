@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"log"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -180,11 +181,26 @@ func (c *Catalog) GetPokemonTypes(speciesID int, name string) []string {
 	return nil
 }
 
-// GetSpeciesIDByName retorna o ID da espécie pelo nome ou slug
+// GetSpeciesIDByName retorna o ID da espécie pelo nome ou slug, com suporte a apelidos e variações
 func (c *Catalog) GetSpeciesIDByName(name string) int {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
+	return c.getSpeciesIDByNameLocked(name)
+}
+
+func (c *Catalog) getSpeciesIDByNameLocked(name string) int {
 	norm := strings.ToLower(strings.TrimSpace(name))
+	if norm == "" {
+		return 0
+	}
+	switch norm {
+	case "nidoranfe", "nidoran-f", "nidoranf", "nidoranfemale":
+		return 29
+	case "nidoranma", "nidoran-m", "nidoranm", "nidoranmale":
+		return 32
+	case "farfetch_d", "farfetch'd", "farfetchd":
+		return 83
+	}
 	if sp, ok := c.speciesByName[norm]; ok {
 		return sp.ID
 	}
@@ -199,6 +215,119 @@ func (c *Catalog) GetSpeciesByID(id int) (SpeciesTypeInfo, bool) {
 	return sp, ok
 }
 
+// GetBestiaryQueue retorna a fila completa e ordenada de espécies para fechar o Bestiário
+func (c *Catalog) GetBestiaryQueue(attackerTypes []string, playerLevel int, dexEntries map[int]PokedexSpeciesEntry) []BestiaryQueueItem {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.getBestiaryQueueLocked(attackerTypes, playerLevel, dexEntries)
+}
+
+func (c *Catalog) getBestiaryQueueLocked(attackerTypes []string, playerLevel int, dexEntries map[int]PokedexSpeciesEntry) []BestiaryQueueItem {
+	if playerLevel <= 0 {
+		playerLevel = 1
+	}
+
+	// Agrupa caçadas por espécie única acessível para o nível do treinador
+	bestHuntBySpecies := make(map[int]CatalogHunt)
+	for _, h := range c.data.Hunts {
+		if h.Level <= 0 || h.Level > playerLevel {
+			continue
+		}
+		spID := c.getSpeciesIDByNameLocked(h.Slug)
+		if spID <= 0 {
+			spID = c.getSpeciesIDByNameLocked(h.Name)
+		}
+		if spID <= 0 {
+			continue
+		}
+
+		existing, ok := bestHuntBySpecies[spID]
+		if !ok || h.Level > existing.Level {
+			bestHuntBySpecies[spID] = h
+		}
+	}
+
+	var items []BestiaryQueueItem
+	for spID, h := range bestHuntBySpecies {
+		var defenderTypes []string
+		if h.Type1 != "" {
+			defenderTypes = append(defenderTypes, strings.ToUpper(h.Type1))
+		}
+		if h.Type2 != "" {
+			defenderTypes = append(defenderTypes, strings.ToUpper(h.Type2))
+		}
+
+		offMult := GetBestOffensiveMultiplier(attackerTypes, defenderTypes)
+		risk := GetIncomingRisk(attackerTypes, defenderTypes)
+
+		entry, hasEntry := dexEntries[spID]
+		kills := 0
+		claimed := false
+		canClaim := false
+		if hasEntry {
+			kills = entry.Kills
+			claimed = entry.Claimed
+			canClaim = entry.CanClaim || (kills >= 100 && !claimed)
+		}
+
+		targetKills := 100
+		remaining := targetKills - kills
+		if remaining < 0 {
+			remaining = 0
+		}
+
+		spName := h.Name
+		if sp, ok := c.speciesByID[spID]; ok && sp.Name != "" {
+			spName = sp.Name
+		}
+
+		score := 0.0
+		isComplete := claimed || kills >= 100
+
+		if isComplete {
+			// Já concluído: joga para o fim da fila com pontuação negativa
+			score = -100000.0 - float64(h.Level)
+		} else {
+			// Pontuação para concluir o Bestiário de forma inteligente:
+			// 1. Base sólida para espécies pendentes
+			score = 10000.0
+			// 2. Vantagem elemental ofensiva (4.0x = +4000, 2.0x = +2000, 1.0x = +1000)
+			score += offMult * 1000.0
+			// 3. Proximidade de bater a meta: prioriza fechar monstros que já possuem abates (+60 pts por abate)
+			score += float64(kills) * 60.0
+			// 4. Bônus por nível da rota (mais XP base por monstro)
+			score += float64(h.Level) * 25.0
+			// 5. Penalidade para rotas de alto risco defensivo
+			score -= risk * 150.0
+		}
+
+		items = append(items, BestiaryQueueItem{
+			SpeciesID:   spID,
+			Name:        spName,
+			Slug:        h.Slug,
+			Level:       h.Level,
+			Types:       defenderTypes,
+			Offensive:   offMult,
+			Risk:        risk,
+			Kills:       kills,
+			TargetKills: targetKills,
+			Remaining:   remaining,
+			Claimed:     claimed,
+			CanClaim:    canClaim,
+			Score:       score,
+		})
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].Score != items[j].Score {
+			return items[i].Score > items[j].Score
+		}
+		return items[i].Level > items[j].Level
+	})
+
+	return items
+}
+
 // FindBestWeaknessHunt encontra a área de caça ideal onde os monstros têm maior fraqueza contra o Pokémon do jogador
 func (c *Catalog) FindBestWeaknessHunt(attackerTypes []string, playerLevel int) (CatalogHunt, float64, float64, bool) {
 	return c.FindBestHunt(attackerTypes, playerLevel, nil, false)
@@ -209,61 +338,42 @@ func (c *Catalog) FindBestHunt(attackerTypes []string, playerLevel int, dexEntri
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
+	if playerLevel <= 0 {
+		playerLevel = 1
+	}
+
+	// 1. Se modo Bestiário estiver ativo e houver dados da Pokédex, segue estritamente a fila prioritária do Bestiário
+	if pokedexMode && len(dexEntries) > 0 {
+		queue := c.getBestiaryQueueLocked(attackerTypes, playerLevel, dexEntries)
+		if len(queue) > 0 && queue[0].Score > 0 {
+			target := queue[0]
+			if h, ok := c.huntsBySlug[strings.ToLower(target.Slug)]; ok {
+				return h, target.Offensive, target.Risk, true
+			}
+		}
+	}
+
+	// 2. Modo Padrão / Fallback: busca rota de maior XP por fraqueza e nível
 	var bestHunt CatalogHunt
 	bestScore := -999999.0
 	bestOffensive := 1.0
 	bestRisk := 1.0
 	found := false
 
-	if playerLevel <= 0 {
-		playerLevel = 1
-	}
-
 	for _, h := range c.data.Hunts {
-		// Ignora cidades e rotas de nível 0
-		if h.Level <= 0 {
-			continue
-		}
-
-		// Apenas rotas disponíveis para o nível atual do jogador
-		if h.Level > playerLevel {
+		if h.Level <= 0 || h.Level > playerLevel {
 			continue
 		}
 
 		var defenderTypes []string
 		if h.Type1 != "" {
-			defenderTypes = append(defenderTypes, h.Type1)
+			defenderTypes = append(defenderTypes, strings.ToUpper(h.Type1))
 		}
 		if h.Type2 != "" {
-			defenderTypes = append(defenderTypes, h.Type2)
+			defenderTypes = append(defenderTypes, strings.ToUpper(h.Type2))
 		}
 
 		score := ScoreMatchup(attackerTypes, defenderTypes, h.Level, playerLevel)
-
-		// Bônus da Estratégia de Bestiário (Pokédex):
-		// Prioriza espécies cujo bônus de 100 abates (+25% XP) ainda NÃO foi reivindicado
-		if pokedexMode && len(dexEntries) > 0 {
-			spID := 0
-			if sp, ok := c.speciesByName[strings.ToLower(strings.TrimSpace(h.Slug))]; ok {
-				spID = sp.ID
-			} else if sp, ok := c.speciesByName[strings.ToLower(strings.TrimSpace(h.Name))]; ok {
-				spID = sp.ID
-			}
-
-			if spID > 0 {
-				if entry, exists := dexEntries[spID]; exists {
-					if !entry.Claimed && entry.Kills < 100 {
-						// Bônus para focar em fechar o Bestiário
-						score += 4000.0
-						// Proximidade da meta: quanto mais abates tiver, mais prioridade para fechar os 100
-						score += float64(entry.Kills) * 40.0
-					}
-				} else {
-					// Espécie ainda não iniciada: bônus de descoberta
-					score += 3500.0
-				}
-			}
-		}
 
 		if score > bestScore {
 			bestScore = score
@@ -276,3 +386,4 @@ func (c *Catalog) FindBestHunt(attackerTypes []string, playerLevel int, dexEntri
 
 	return bestHunt, bestOffensive, bestRisk, found
 }
+
