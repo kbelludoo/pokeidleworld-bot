@@ -161,6 +161,9 @@ func main() {
 							fmt.Printf("  Área de Caça: %s | EXP/H: %.0f | Duração: %ds\n", st.CurrentArea, st.ExpPerHour, st.DurationSec)
 						}
 					}
+					if dexKills, ok := st.Extra["pokedexKills"].(string); ok && dexKills != "" {
+						fmt.Printf("  📖 Bestiário: %s abates (Meta: 100 abates p/ +25%% XP)\n", dexKills)
+					}
 					fmt.Println("--------------------------------------------------------------------------------")
 				}
 			}

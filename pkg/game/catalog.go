@@ -180,8 +180,32 @@ func (c *Catalog) GetPokemonTypes(speciesID int, name string) []string {
 	return nil
 }
 
+// GetSpeciesIDByName retorna o ID da espécie pelo nome ou slug
+func (c *Catalog) GetSpeciesIDByName(name string) int {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	norm := strings.ToLower(strings.TrimSpace(name))
+	if sp, ok := c.speciesByName[norm]; ok {
+		return sp.ID
+	}
+	return 0
+}
+
+// GetSpeciesByID retorna as informações da espécie pelo ID
+func (c *Catalog) GetSpeciesByID(id int) (SpeciesTypeInfo, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	sp, ok := c.speciesByID[id]
+	return sp, ok
+}
+
 // FindBestWeaknessHunt encontra a área de caça ideal onde os monstros têm maior fraqueza contra o Pokémon do jogador
 func (c *Catalog) FindBestWeaknessHunt(attackerTypes []string, playerLevel int) (CatalogHunt, float64, float64, bool) {
+	return c.FindBestHunt(attackerTypes, playerLevel, nil, false)
+}
+
+// FindBestHunt encontra a área de caça ideal considerando fraqueza elemental, nível e progresso do Bestiário (100 abates)
+func (c *Catalog) FindBestHunt(attackerTypes []string, playerLevel int, dexEntries map[int]PokedexSpeciesEntry, pokedexMode bool) (CatalogHunt, float64, float64, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -215,6 +239,32 @@ func (c *Catalog) FindBestWeaknessHunt(attackerTypes []string, playerLevel int) 
 		}
 
 		score := ScoreMatchup(attackerTypes, defenderTypes, h.Level, playerLevel)
+
+		// Bônus da Estratégia de Bestiário (Pokédex):
+		// Prioriza espécies cujo bônus de 100 abates (+25% XP) ainda NÃO foi reivindicado
+		if pokedexMode && len(dexEntries) > 0 {
+			spID := 0
+			if sp, ok := c.speciesByName[strings.ToLower(strings.TrimSpace(h.Slug))]; ok {
+				spID = sp.ID
+			} else if sp, ok := c.speciesByName[strings.ToLower(strings.TrimSpace(h.Name))]; ok {
+				spID = sp.ID
+			}
+
+			if spID > 0 {
+				if entry, exists := dexEntries[spID]; exists {
+					if !entry.Claimed && entry.Kills < 100 {
+						// Bônus para focar em fechar o Bestiário
+						score += 4000.0
+						// Proximidade da meta: quanto mais abates tiver, mais prioridade para fechar os 100
+						score += float64(entry.Kills) * 40.0
+					}
+				} else {
+					// Espécie ainda não iniciada: bônus de descoberta
+					score += 3500.0
+				}
+			}
+		}
+
 		if score > bestScore {
 			bestScore = score
 			bestHunt = h

@@ -37,6 +37,8 @@ type GameSettings struct {
 	AutoGuildAccept  bool   `json:"autoGuildAccept,omitempty"`  // Aceitar automaticamente convites de guildas com bônus de XP
 	AutoGuildRecruit bool   `json:"autoGuildRecruit,omitempty"` // Divulgar procura de guilda no chat periodicamente
 	AutoGuildDonate  bool   `json:"autoGuildDonate,omitempty"`  // Doar ouro excedente para a guilda
+	AutoPokedexClaim bool   `json:"autoPokedexClaim,omitempty"` // Reivindicar automaticamente bônus +25% de XP da Pokédex (100 abates)
+	PokedexFarmMode  bool   `json:"pokedexFarmMode,omitempty"`  // Focar em rotas para completar 100 abates do Bestiário e rotacionar
 }
 
 // ==========================================
@@ -371,4 +373,31 @@ type SellItemsRequest struct {
 		ItemID int `json:"itemId"`
 		Qty    int `json:"qty"`
 	} `json:"items"`
+}
+
+type PokedexSpeciesEntry struct {
+	ID           int  `json:"id"`
+	Kills        int  `json:"kills"`
+	Unlocked     bool `json:"unlocked"`
+	Claimed      bool `json:"claimed"`
+	Caught       bool `json:"caught"`
+	CanClaim     bool `json:"canClaim"`
+	CaptureBonus int  `json:"captureBonus"`
+}
+
+type PokedexResponse struct {
+	UnlockKills int                   `json:"unlockKills"`
+	Species     []PokedexSpeciesEntry `json:"species"`
+}
+
+type PokedexClaimRequest struct {
+	SpeciesID int `json:"speciesId"`
+}
+
+type PokedexClaimResponse struct {
+	OK        bool  `json:"ok"`
+	SpeciesID int   `json:"speciesId"`
+	XPGained  int64 `json:"xpGained"`
+	Level     int   `json:"level"`
+	TotalXP   int64 `json:"totalXp"`
 }

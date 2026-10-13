@@ -86,6 +86,10 @@ type Bot struct {
 	lastRecruitPingAt time.Time
 	nextRecruitPingAt time.Time
 
+	// Bestiário e Pokédex
+	pokedexSpecies     map[int]PokedexSpeciesEntry
+	lastPokedexCheckAt time.Time
+
 	// Temporizadores e controle
 	lastFieldAt   time.Time
 	lastBuyBallAt time.Time
@@ -125,6 +129,13 @@ func NewBot(cfg AccountConfig) *Bot {
 	if !cfg.Settings.AutoGuildRecruit {
 		cfg.Settings.AutoGuildRecruit = true
 	}
+	// Habilitar estratégia de Bestiário por padrão
+	if !cfg.Settings.AutoPokedexClaim {
+		cfg.Settings.AutoPokedexClaim = true
+	}
+	if !cfg.Settings.PokedexFarmMode {
+		cfg.Settings.PokedexFarmMode = true
+	}
 
 	st := engine.NewStatus(cfg.ID, cfg.Name)
 	if cfg.Settings.AutoWeakness || cfg.Settings.HuntTarget == "auto" {
@@ -134,6 +145,8 @@ func NewBot(cfg AccountConfig) *Bot {
 	}
 	st.Extra["slug"] = cfg.Settings.HuntTarget
 	st.Extra["autoWeakness"] = cfg.Settings.AutoWeakness
+	st.Extra["pokedexFarmMode"] = cfg.Settings.PokedexFarmMode
+	st.Extra["pokedexKills"] = "Carregando..."
 	st.Extra["matchup"] = "Avaliando..."
 	st.Extra["captures"] = 0
 	st.Extra["balls"] = 0
@@ -155,6 +168,7 @@ func NewBot(cfg AccountConfig) *Bot {
 		refreshToken:      cfg.Credentials.RefreshToken,
 		targetSlug:        cfg.Settings.HuntTarget,
 		ballCounts:        make(map[string]int),
+		pokedexSpecies:    make(map[int]PokedexSpeciesEntry),
 		ticketChan:        make(chan string, 1),
 		disconnectCh:      make(chan error, 1),
 		nextRecruitPingAt: nextRecruitAt,
@@ -343,6 +357,7 @@ func (b *Bot) Run(ctx context.Context) error {
 		_ = socket.SendJSON(map[string]any{"type": "inv-get"})
 		_ = socket.SendJSON(map[string]any{"type": "analyzer-get"})
 		_ = socket.SendJSON(GuildGetPacket{Type: "guild-get", WithList: true})
+		go b.checkAndClaimPokedex()
 
 		// Entra na área de caça se AutoHunt estiver habilitado e rota já estiver definida
 		b.mu.RLock()
@@ -393,6 +408,9 @@ func (b *Bot) superviseSession(ctx context.Context) error {
 
 	dailyTicker := time.NewTicker(30 * time.Minute)
 	defer dailyTicker.Stop()
+
+	pokedexTicker := time.NewTicker(35 * time.Second)
+	defer pokedexTicker.Stop()
 
 	for {
 		select {
@@ -476,6 +494,9 @@ func (b *Bot) superviseSession(ctx context.Context) error {
 			if b.config.Settings.AutoDaily {
 				go b.claimDailyRewards()
 			}
+
+		case <-pokedexTicker.C:
+			go b.checkAndClaimPokedex()
 		}
 	}
 }
@@ -573,14 +594,19 @@ func (b *Bot) handleMessage(data []byte) {
 		}
 
 	case "field-kill":
+		kCount := 0
 		b.updateStatus(func(st *engine.AccountStatus) {
 			st.Kills++
+			kCount = st.Kills
 		})
 		b.mu.RLock()
 		s := b.socket
 		b.mu.RUnlock()
 		if s != nil {
 			_ = s.SendJSON(map[string]any{"type": "analyzer-get"})
+		}
+		if kCount > 0 && kCount%10 == 0 {
+			go b.checkAndClaimPokedex()
 		}
 
 	case "field-lost":
@@ -892,7 +918,7 @@ func (b *Bot) handleMessage(data []byte) {
 			}
 			bodyLower := strings.ToLower(ev.Msg.Body)
 			// Se alguém nos mencionou ou convidou no chat
-			if strings.Contains(bodyLower, tName) || strings.Contains(bodyLower, "kbelludoo") {
+			if tName != "" && strings.Contains(bodyLower, tName) {
 				b.addLog(fmt.Sprintf("💬 [Chat %s] %s: %s", ev.Msg.Channel, ev.Msg.FromName, ev.Msg.Body))
 				// Imediatamente atualiza guild-get para pegar o convite
 				b.mu.RLock()
@@ -963,14 +989,28 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 		return
 	}
 
-	// Modo Auto-Fraqueza: busca rota ideal no catálogo com base nas fraquezas elementais e XP
-	bestHunt, offMult, risk, found := b.catalog.FindBestWeaknessHunt(activeTypes, playerLevel)
+	b.mu.RLock()
+	dexEntries := make(map[int]PokedexSpeciesEntry)
+	for k, v := range b.pokedexSpecies {
+		dexEntries[k] = v
+	}
+	pokedexMode := b.config.Settings.PokedexFarmMode
+	b.mu.RUnlock()
+
+	// Modo Auto-Fraqueza / Bestiário: busca rota ideal no catálogo com base nas fraquezas elementais, XP e Bestiário
+	bestHunt, offMult, risk, found := b.catalog.FindBestHunt(activeTypes, playerLevel, dexEntries, pokedexMode)
 	if !found {
 		return
 	}
 
 	targetTypes := b.catalog.GetHuntTypes(bestHunt.Slug)
 	desc := FormatMatchupDescription(offMult, risk, bestHunt.Level)
+
+	targetSpID := b.catalog.GetSpeciesIDByName(bestHunt.Slug)
+	killsText := "0/100"
+	if entry, ok := dexEntries[targetSpID]; ok {
+		killsText = fmt.Sprintf("%d/100", entry.Kills)
+	}
 
 	b.mu.Lock()
 	slugChanged := b.targetSlug != bestHunt.Slug
@@ -986,15 +1026,16 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 		st.CurrentArea = bestHunt.Name
 		st.Extra["slug"] = bestHunt.Slug
 		st.Extra["huntLevel"] = bestHunt.Level
+		st.Extra["pokedexKills"] = killsText
 		st.Extra["matchup"] = fmt.Sprintf("%.1fx Dano", offMult)
 		st.Extra["matchupDetail"] = desc
 		st.Extra["enemyTypes"] = strings.Join(targetTypes, " / ")
 	})
 
 	if slugChanged || forceEnter {
-		b.addLog(fmt.Sprintf("🎯 [Fraqueza Detectada] %s [%s] -> %s (Lv. %d) [%s] | Dano: %.1fx | %s",
+		b.addLog(fmt.Sprintf("🎯 [Rota / Bestiário] %s [%s] -> %s (Lv. %d) [%s] | Dano: %.1fx | %s | Bestiário: %s",
 			activeName, strings.Join(activeTypes, "/"), bestHunt.Name, bestHunt.Level,
-			strings.Join(targetTypes, "/"), offMult, desc))
+			strings.Join(targetTypes, "/"), offMult, desc, killsText))
 		if s != nil && autoHunt {
 			b.sendEnterHunt(false)
 		}
@@ -1096,6 +1137,88 @@ func (b *Bot) claimDailyRewards() {
 
 	// 2. Recompensa de missão diária de abate
 	_ = b.httpCli.PostJSON("/api/game/daily-kill/claim", map[string]any{}, &dummy)
+}
+
+// checkAndClaimPokedex consulta a Pokédex/Bestiário, resgata bônus de +25% XP pendentes e atualiza progresso
+func (b *Bot) checkAndClaimPokedex() bool {
+	if b.token == "" {
+		return false
+	}
+
+	var res PokedexResponse
+	err := b.httpCli.GetJSON("/api/game/pokedex", &res)
+	if err != nil {
+		return false
+	}
+
+	b.mu.Lock()
+	if b.pokedexSpecies == nil {
+		b.pokedexSpecies = make(map[int]PokedexSpeciesEntry)
+	}
+	var newlyClaimedSpecies []int
+
+	for _, entry := range res.Species {
+		b.pokedexSpecies[entry.ID] = entry
+		if entry.CanClaim && b.config.Settings.AutoPokedexClaim {
+			newlyClaimedSpecies = append(newlyClaimedSpecies, entry.ID)
+		}
+	}
+	currentSlug := b.targetSlug
+	b.mu.Unlock()
+
+	claimedAny := false
+	for _, spID := range newlyClaimedSpecies {
+		var claimRes PokedexClaimResponse
+		req := PokedexClaimRequest{SpeciesID: spID}
+		claimErr := b.httpCli.PostJSON("/api/game/pokedex/claim", req, &claimRes)
+		if claimErr == nil && claimRes.OK {
+			claimedAny = true
+			spInfo, _ := b.catalog.GetSpeciesByID(spID)
+			spName := spInfo.Name
+			if spName == "" {
+				spName = fmt.Sprintf("#%d", spID)
+			}
+			b.addLog(fmt.Sprintf("📖 [Bestiário] 🎉 Bônus +25%% XP resgatado para %s (+%d XP)! Nível: Lv. %d",
+				spName, claimRes.XPGained, claimRes.Level))
+
+			b.updateStatus(func(st *engine.AccountStatus) {
+				if claimRes.Level > st.Level {
+					st.Level = claimRes.Level
+				}
+			})
+
+			b.mu.Lock()
+			if entry, ok := b.pokedexSpecies[spID]; ok {
+				entry.Claimed = true
+				entry.CanClaim = false
+				b.pokedexSpecies[spID] = entry
+			}
+			b.mu.Unlock()
+		}
+	}
+
+	// Atualiza progresso da criatura atual no status
+	currentSpID := b.catalog.GetSpeciesIDByName(currentSlug)
+	b.mu.RLock()
+	curEntry, hasCur := b.pokedexSpecies[currentSpID]
+	b.mu.RUnlock()
+
+	b.updateStatus(func(st *engine.AccountStatus) {
+		if hasCur {
+			st.Extra["pokedexKills"] = fmt.Sprintf("%d/100", curEntry.Kills)
+			st.Extra["pokedexClaimed"] = curEntry.Claimed
+		} else {
+			st.Extra["pokedexKills"] = "0/100"
+			st.Extra["pokedexClaimed"] = false
+		}
+	})
+
+	// Se resgatou bônus e o modo Bestiário estiver ativo, re-avalia rota imediatamente
+	if claimedAny && b.config.Settings.PokedexFarmMode {
+		b.evaluateAndSwitchWeaknessHunt(false)
+	}
+
+	return claimedAny
 }
 
 // refreshAccessToken renova o token usando o refreshToken
@@ -1353,6 +1476,21 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 		err := b.SupplyTicket(ticket, "")
 		b.mu.Lock()
 		return "Token atualizado com sucesso!", err
+
+	case "claimPokedex", "pokedexClaim":
+		go b.checkAndClaimPokedex()
+		return "Verificação e resgate da Pokédex disparados!", nil
+
+	case "togglePokedex":
+		b.config.Settings.PokedexFarmMode = !b.config.Settings.PokedexFarmMode
+		b.status.Extra["pokedexFarmMode"] = b.config.Settings.PokedexFarmMode
+		modeStr := "OFF"
+		if b.config.Settings.PokedexFarmMode {
+			modeStr = "ON"
+			go b.evaluateAndSwitchWeaknessHunt(true)
+		}
+		b.appendLogLocked(fmt.Sprintf("Modo Foco em Bestiário alterado para: %s", modeStr))
+		return fmt.Sprintf("Modo Bestiário alterado para %s!", modeStr), nil
 
 	default:
 		return nil, fmt.Errorf("ação desconhecida: %s", action)
