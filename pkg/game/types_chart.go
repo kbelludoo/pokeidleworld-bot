@@ -148,40 +148,50 @@ func GetIncomingRisk(attackerTypes, defenderTypes []string) float64 {
 	return maxRisk
 }
 
-// ScoreMatchup avalia o confronto entre o Pokémon do jogador e o monstro da área de caça
+// ScoreMatchup avalia o confronto entre o Pokémon do jogador e o monstro da área de caça combinando Dano Ofensivo, Risco e Ganho de XP por Nível
 func ScoreMatchup(attackerTypes, defenderTypes []string, huntLevel int, playerLevel int) float64 {
 	offensive := GetBestOffensiveMultiplier(attackerTypes, defenderTypes)
 	risk := GetIncomingRisk(attackerTypes, defenderTypes)
 
-	// Base de pontuação por fraqueza:
-	// 4.0x (fraqueza dupla) = 4000 pts
-	// 2.0x (super efetivo)  = 2000 pts
-	// 1.0x (neutro)         = 1000 pts
-	// 0.5x (pouco efetivo)  = 500 pts
-	// 0.25x (resistido)     = 250 pts
-	score := offensive * 1000.0
+	if offensive <= 0.0 {
+		return -999999.0 // Imunidade total (0x de dano)
+	}
+
+	// Base de XP da criatura:
+	// No Poke Idle World, o ganho de XP escala fortemente com o nível do monstro.
+	// Criaturas Lv. 10 dão cerca de 6x a 8x mais XP base do que Lv. 1, e Lv. 20 muito mais que Lv. 10.
+	baseXP := 50.0 + float64(huntLevel)*80.0
+
+	// Eficiência de EXP/Hora esperada:
+	// (Dano Ofensivo) x (Base de XP do Monstro)
+	// Com 4.0x ou 2.0x, a velocidade de abate é multiplicada pelo dano, gerando alta taxa de XP/s.
+	score := offensive * baseXP
 
 	// Penalidade pelo risco de dano recebido:
-	// Se o inimigo nos causa 2.0x, perde 500 pts. Se causa 0.5x, ganha 250 pts
-	score -= (risk - 1.0) * 500.0
+	// Se o inimigo nos causa 2.0x de dano, perdemos tempo com curas da Nurse Joy
+	// Se resistimos (0.5x), ganhamos bônus de sobrevivência ininterrupta
+	score -= (risk - 1.0) * 300.0
 
-	// Fator de nível: prioriza áreas com nível mais próximo ao do jogador (desde que <= playerLevel)
-	// para obter maior rendimento de EXP e Ouro por monstro derrotado
+	// Restrições de nível do jogador:
 	if playerLevel > 0 {
-		if huntLevel <= playerLevel {
-			// Bônus proporcional ao nível da hunt
-			score += float64(huntLevel) * 20.0
+		if huntLevel > playerLevel {
+			// Nível acima do jogador: penalidade severa (não liberado ou arriscado demais)
+			score -= float64(huntLevel-playerLevel) * 10000.0
 		} else {
-			// Nível superior ao jogador: penalidade pesada pois não é recomendado / pode estar bloqueado
-			score -= float64(huntLevel-playerLevel) * 200.0
+			// Bônus para rotas na faixa mais próxima do nível do jogador:
+			// Garante que o jogador progrida para monstros maiores conforme upa
+			diff := playerLevel - huntLevel
+			if diff <= 10 {
+				score += float64(10-diff) * 40.0
+			}
 		}
 	}
 
 	return score
 }
 
-// FormatMatchupDescription formata uma descrição amigável do confronto
-func FormatMatchupDescription(offensiveMult float64, risk float64) string {
+// FormatMatchupDescription formata uma descrição amigável do confronto combinando Fraqueza, Risco e Faixa de XP
+func FormatMatchupDescription(offensiveMult float64, risk float64, huntLevel int) string {
 	var offText string
 	if offensiveMult >= 4.0 {
 		offText = "4.0x (Fraqueza Dupla!)"
@@ -197,12 +207,21 @@ func FormatMatchupDescription(offensiveMult float64, risk float64) string {
 
 	var defText string
 	if risk >= 2.0 {
-		defText = "Alto Risco (Inimigo Super Efetivo)"
+		defText = "Alto Risco"
 	} else if risk <= 0.5 {
-		defText = "Baixo Risco (Resistimos aos ataques)"
+		defText = "Baixo Risco (Resistido)"
 	} else {
 		defText = "Risco Moderado"
 	}
 
-	return fmt.Sprintf("%s | %s", offText, defText)
+	var xpTag string
+	if huntLevel >= 20 {
+		xpTag = fmt.Sprintf("XP Máxima (Lv. %d)", huntLevel)
+	} else if huntLevel >= 10 {
+		xpTag = fmt.Sprintf("Alta XP (Lv. %d)", huntLevel)
+	} else {
+		xpTag = fmt.Sprintf("XP Inicial (Lv. %d)", huntLevel)
+	}
+
+	return fmt.Sprintf("%s | %s | %s", offText, defText, xpTag)
 }

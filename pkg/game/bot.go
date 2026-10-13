@@ -360,8 +360,23 @@ func (b *Bot) Run(ctx context.Context) error {
 			return ctx.Err()
 		}
 
-		log.Printf("[%s] Conexão encerrada. Reconectando em 2 segundos...", b.ID())
-		time.Sleep(2 * time.Second)
+		reconnectWait := 3 * time.Second
+		if runErr != nil && strings.Contains(runErr.Error(), "4005") {
+			b.updateStatus(func(s *engine.AccountStatus) {
+				s.Status = "Sessão Ativa no Navegador (pausa 30s)"
+			})
+			b.addLog("Sessão aberta em outro dispositivo/aba (código 4005). Aguardando 30s para não derrubar o jogador...")
+			log.Printf("[%s] Sessão aberta no navegador (close 4005). Aguardando 30 segundos...", b.ID())
+			reconnectWait = 30 * time.Second
+		} else {
+			log.Printf("[%s] Conexão encerrada. Reconectando em 3 segundos...", b.ID())
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(reconnectWait):
+		}
 	}
 }
 
@@ -499,11 +514,16 @@ func (b *Bot) handleMessage(data []byte) {
 			}
 
 			areaName := b.catalog.GetHuntName(ev.Slug)
-			desc := FormatMatchupDescription(offMult, risk)
+			huntLevel := 0
+			if h, ok := b.catalog.GetHunt(ev.Slug); ok {
+				huntLevel = h.Level
+			}
+			desc := FormatMatchupDescription(offMult, risk, huntLevel)
 			b.updateStatus(func(st *engine.AccountStatus) {
 				st.Status = "hunting"
 				st.CurrentArea = areaName
 				st.Extra["slug"] = ev.Slug
+				st.Extra["huntLevel"] = huntLevel
 				st.Extra["matchup"] = fmt.Sprintf("%.1fx Dano", offMult)
 				st.Extra["matchupDetail"] = desc
 				st.Extra["enemyTypes"] = strings.Join(targetTypes, " / ")
@@ -920,9 +940,13 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	if !autoWeakness && currentSlug != "" && currentSlug != "auto" {
 		// Modo manual: calcula eficácia do alvo atual para exibição
 		targetTypes := b.catalog.GetHuntTypes(currentSlug)
+		huntLevel := 0
+		if h, ok := b.catalog.GetHunt(currentSlug); ok {
+			huntLevel = h.Level
+		}
 		offMult := GetBestOffensiveMultiplier(activeTypes, targetTypes)
 		risk := GetIncomingRisk(activeTypes, targetTypes)
-		desc := FormatMatchupDescription(offMult, risk)
+		desc := FormatMatchupDescription(offMult, risk, huntLevel)
 
 		b.mu.Lock()
 		b.offensiveMult = offMult
@@ -933,19 +957,20 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 		b.updateStatus(func(st *engine.AccountStatus) {
 			st.Extra["matchup"] = fmt.Sprintf("%.1fx Dano", offMult)
 			st.Extra["matchupDetail"] = desc
+			st.Extra["huntLevel"] = huntLevel
 			st.Extra["enemyTypes"] = strings.Join(targetTypes, " / ")
 		})
 		return
 	}
 
-	// Modo Auto-Fraqueza: busca rota ideal no catálogo com base nas fraquezas elementais
+	// Modo Auto-Fraqueza: busca rota ideal no catálogo com base nas fraquezas elementais e XP
 	bestHunt, offMult, risk, found := b.catalog.FindBestWeaknessHunt(activeTypes, playerLevel)
 	if !found {
 		return
 	}
 
 	targetTypes := b.catalog.GetHuntTypes(bestHunt.Slug)
-	desc := FormatMatchupDescription(offMult, risk)
+	desc := FormatMatchupDescription(offMult, risk, bestHunt.Level)
 
 	b.mu.Lock()
 	slugChanged := b.targetSlug != bestHunt.Slug
@@ -960,6 +985,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	b.updateStatus(func(st *engine.AccountStatus) {
 		st.CurrentArea = bestHunt.Name
 		st.Extra["slug"] = bestHunt.Slug
+		st.Extra["huntLevel"] = bestHunt.Level
 		st.Extra["matchup"] = fmt.Sprintf("%.1fx Dano", offMult)
 		st.Extra["matchupDetail"] = desc
 		st.Extra["enemyTypes"] = strings.Join(targetTypes, " / ")

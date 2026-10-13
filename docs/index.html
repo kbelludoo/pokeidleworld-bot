@@ -604,9 +604,22 @@
       blastoise: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png',
       caterpie: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10.png',
       pikachu: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png',
+      diglett: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/50.png',
+      psyduck: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/54.png',
       geodude: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png',
       graveler: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/75.png',
-      golem: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png'
+      golem: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png',
+      slowpoke: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/79.png',
+      shellder: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/90.png',
+      krabby: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/98.png',
+      horsea: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/116.png',
+      goldeen: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/118.png',
+      staryu: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/120.png',
+      omanyte: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/138.png',
+      kabuto: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/140.png',
+      wooper: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/194.png',
+      remoraid: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/223.png',
+      chinchou: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/170.png'
     };
 
     function copyBookmarklet() {
@@ -711,8 +724,33 @@
           document.getElementById('targetPokeImg').src = POKE_IMAGES[targetSlug];
         }
 
-        // Multiplicador
-        document.getElementById('heroMultiplier').textContent = extra.matchup || '4.0x';
+        // Multiplicador & Detalhes de Eficiência
+        document.getElementById('heroMultiplier').textContent = extra.matchup || '2.0x';
+        const multSub = document.querySelector('.mult-sub');
+        if (multSub) {
+          multSub.textContent = extra.matchupDetail || 'Alta Eficiência de XP';
+        }
+
+        // Tipos do Alvo
+        if (extra.enemyTypes) {
+          const types = extra.enemyTypes.split('/').map(t => t.trim().toUpperCase());
+          const t1 = document.getElementById('targetType1');
+          const t2 = document.getElementById('targetType2');
+          if (t1 && types[0]) {
+            t1.textContent = types[0];
+            t1.className = 'type-pill type-' + types[0].toLowerCase();
+            t1.style.display = 'inline-block';
+          }
+          if (t2) {
+            if (types[1]) {
+              t2.textContent = types[1];
+              t2.className = 'type-pill type-' + types[1].toLowerCase();
+              t2.style.display = 'inline-block';
+            } else {
+              t2.style.display = 'none';
+            }
+          }
+        }
 
         // HP
         const hp = acc.hp || 348;
