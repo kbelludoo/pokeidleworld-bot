@@ -527,7 +527,7 @@
     <div class="dashboard-card">
       <div class="acc-header">
         <div class="trainer-title">
-          <span>🧢 Treinador: <b id="trainerNick" style="color:#38bdf8;">kbelludoo</b></span>
+          <span>🧢 Treinador: <b id="trainerNick" style="color:#38bdf8;">Treinador #1</b></span>
           <span class="level-badge" id="trainerLevel">Lv. 19</span>
         </div>
         <span class="badge-status" id="huntStatusBadge">⚔️ Caçando Ativamente</span>
@@ -556,44 +556,15 @@
         </div>
       </div>
 
-      <!-- ACTIONS GRID -->
-      <div class="actions-grid">
-        <button class="btn btn-primary" onclick="dispatchAction('autoHunt')">⚔️ Alternar Caçada</button>
-        <button class="btn btn-green" onclick="dispatchAction('joyHeal')">💖 Nurse Joy (Curar Equipe)</button>
-        <button class="btn" onclick="dispatchAction('toggleWeakness')">🎯 Auto-Fraqueza (4.0x)</button>
-        <button class="btn" onclick="dispatchAction('autoCatch')">🔴 Auto-Catch (Pokébolas)</button>
-        <button class="btn btn-purple" onclick="dispatchAction('guildRecruit')">📢 Divulgar no Chat (Help)</button>
-        <button class="btn" onclick="dispatchAction('guildGet')">🏰 Atualizar Guilda</button>
-        <button class="btn" onclick="promptSendChat()">💬 Enviar Mensagem no Chat</button>
-        <button class="btn" onclick="promptSetArea()">🗺️ Mudar Rota de Caça</button>
-        <button class="btn" onclick="promptBuyBalls()">🛒 Comprar 50 Pokébolas</button>
-        <button class="btn" onclick="dispatchAction('claimDaily')">🎁 Reivindicar Diário</button>
-      </div>
-
       <!-- LOGS BOX -->
       <div class="logs-box" id="logsBox">
         <div class="log-entry">Carregando logs do bot...</div>
       </div>
     </div>
 
-    <!-- QUICK TOKEN INJECTION BOX -->
-    <div class="token-box">
-      <h4>🔑 Injetar Access Token (Mobile ou Desktop)</h4>
-      <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">
-        Para conectar o bot sem reiniciar o terminal, cole seu token JWT ou use o Bookmarklet de 1 Toque no navegador:
-      </p>
-      <div class="token-row">
-        <input type="text" id="tokenInput" placeholder="Cole o token JWT (ey...) aqui...">
-        <button class="btn btn-primary" onclick="submitToken()">Injetar Token</button>
-        <button class="btn" onclick="copyBookmarklet()">📋 Copiar Bookmarklet</button>
-        <span id="tokenFeedback" style="font-size: 0.8rem; align-self: center; font-weight: bold;"></span>
-      </div>
-    </div>
   </div>
 
   <script>
-    let activeApiBase = '';
-
     const POKE_IMAGES = {
       bulbasaur: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png',
       ivysaur: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/2.png',
@@ -622,73 +593,15 @@
       chinchou: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/170.png'
     };
 
-    function copyBookmarklet() {
-      const code = `javascript:(function(){let r=sessionStorage.getItem("pokeweb:tokens")||localStorage.getItem("pokeweb:tokens");if(!r){alert("Entre no jogo poke.idleworld.online primeiro!");return;}let t=JSON.parse(r).accessToken;prompt("Copie seu Access Token:",t);})();`;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(code).then(() => {
-          const fb = document.getElementById('tokenFeedback');
-          fb.style.color = '#22c55e';
-          fb.textContent = '✔ Bookmarklet copiado!';
-          setTimeout(() => fb.textContent = '', 3000);
-        });
-      } else {
-        prompt('Copie o código do Bookmarklet:', code);
-      }
-    }
-
-    async function submitToken() {
-      const input = document.getElementById('tokenInput');
-      const val = (input.value || '').trim();
-      const fb = document.getElementById('tokenFeedback');
-      if (!val) return;
-
-      fb.style.color = '#facc15';
-      fb.textContent = 'Enviando...';
-
-      try {
-        const url = (activeApiBase || 'http://localhost:3001') + '/api/action';
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accountId: 'acc-1', action: 'supplyTicket', payload: { token: val } })
-        });
-        const d = await res.json();
-        if (d.ok) {
-          fb.style.color = '#22c55e';
-          fb.textContent = '✔ Token atualizado com sucesso!';
-          input.value = '';
-          setTimeout(() => fb.textContent = '', 4000);
-          updateData();
-        } else {
-          fb.style.color = '#ef4444';
-          fb.textContent = 'Erro: ' + (d.error || 'Falha ao aplicar token');
-        }
-      } catch (err) {
-        fb.style.color = '#ef4444';
-        fb.textContent = 'Erro de conexão: ' + err.message;
-      }
-    }
-
     async function fetchStatus() {
-      // 1. Tentar localhost:3001
       try {
-        const res = await fetch('http://localhost:3001/api/status', { mode: 'cors' });
+        const res = await fetch('status.json?t=' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
-          activeApiBase = 'http://localhost:3001';
-          document.getElementById('connStatus').textContent = 'Local Engine Conectada (Porta 3001)';
+          const conn = document.getElementById('connStatus');
+          if (conn) conn.textContent = 'GitHub Pages Live Telemetry';
           return await res.json();
         }
       } catch (e) {}
-
-      // 2. Tentar status.json do GitHub Pages
-      try {
-        const res = await fetch('status.json?t=' + Date.now());
-        if (res.ok) {
-          document.getElementById('connStatus').textContent = 'GitHub Pages Live Telemetry';
-          return await res.json();
-        }
-      } catch (e) {}
-
       return null;
     }
 
@@ -706,7 +619,7 @@
         document.getElementById('ballsVal').textContent = (extra.balls || 0).toLocaleString();
         document.getElementById('expRateVal').textContent = Math.round(acc.expPerHour || 0).toLocaleString() + ' EXP/h';
 
-        document.getElementById('trainerNick').textContent = acc.name || 'kbelludoo';
+        document.getElementById('trainerNick').textContent = acc.name || 'Treinador #1';
         document.getElementById('trainerLevel').textContent = 'Lv. ' + (acc.level || extra.pokemonLevel || 19);
 
         // Pokémon ativo
@@ -775,39 +688,6 @@
       } catch (e) {
         console.error(e);
       }
-    }
-
-    async function dispatchAction(action, payload = {}) {
-      const url = (activeApiBase || 'http://localhost:3001') + '/api/action';
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accountId: 'acc-1', action: action, payload: payload })
-        });
-        const d = await res.json();
-        if (d.ok) {
-          updateData();
-        } else {
-          alert('Aviso: ' + (d.error || 'Erro'));
-        }
-      } catch (err) {
-        alert('Não foi possível conectar ao bot local em http://localhost:3001.');
-      }
-    }
-
-    function promptSetArea() {
-      const area = prompt('Informe a rota ou pokémon alvo (ou digite "auto" para fraqueza automática):', 'auto');
-      if (area) dispatchAction('setArea', { slug: area.trim().toLowerCase() });
-    }
-
-    function promptBuyBalls() {
-      dispatchAction('buyBalls', { qty: 50, ballId: 1 });
-    }
-
-    function promptSendChat() {
-      const msg = prompt('Digite a mensagem para enviar no canal help do jogo:');
-      if (msg) dispatchAction('sendChat', { message: msg.trim(), channel: 'help' });
     }
 
     updateData();
