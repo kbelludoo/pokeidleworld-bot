@@ -3,7 +3,7 @@
 Bot autônomo nativo em **Go (Golang)** de altíssima performance e baixíssimo consumo de memória (2 a 5 MB de RAM) para **[Poke Idle World](https://poke.idleworld.online/play)**.
 
 🌐 **Command Center & Live Dashboard (GitHub Pages):**  
-👉 **[https://kbelludoo.github.io/pokeidle-go/](https://kbelludoo.github.io/pokeidle-go/)**
+👉 **[https://kbelludoo.github.io/pokeidleworld-bot/](https://kbelludoo.github.io/pokeidleworld-bot/)**
 
 ---
 
@@ -11,8 +11,8 @@ Bot autônomo nativo em **Go (Golang)** de altíssima performance e baixíssimo 
 
 - 🚀 **WebSocket Direto com Sharding Automático:** Conexão nativa calculando o shard exato via hash DJB2 do claim `sub` do JWT (`wss://poke.idleworld.online/ws{shard}?token={token}&v=2`).
 - 🎯 **Caça Inteligente por Fraqueza (Auto-Weakness):** Motor integrado de análise de tipos Pokémon. Calcula multiplicadores ofensivos (até **4.0x de Dano**) e seleciona automaticamente a melhor rota para maximizar EXP/h com menor risco.
-- 🏰 **Automação de Guilda & Recrutamento no Chat:**
-  - Envia anúncios automáticos de recrutamento no canal `help` do jogo a cada 15 minutos: `"Procuro guild ativa com bônus de XP..."`.
+- 🏰 **Automação de Guilda & Recrutamento no Chat (Anti-Detecção):**
+  - Envia anúncios automáticos de recrutamento no canal `help` do jogo com intervalos aleatórios entre **2h e 8h** e banco de frases naturais variadas.
   - Escuta convites em tempo real e aceita instantaneamente a melhor guilda (+2.5% XP).
   - Detecta menções no chat para checagem imediata de convite.
   - Opção de doação automática de ouro para subir o nível da guilda.
