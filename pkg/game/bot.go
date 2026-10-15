@@ -72,12 +72,13 @@ type Bot struct {
 	ballCounts    map[string]int
 
 	// Fraqueza e vantagem de tipos
-	activePokemon string
-	activeTypes   []string
-	activeLevel   int
-	targetTypes   []string
-	offensiveMult float64
-	incomingRisk  float64
+	activePokemon  string
+	activeTypes    []string
+	activeLevel    int
+	targetTypes    []string
+	offensiveMult  float64
+	incomingRisk   float64
+	availablePokes []PokemonItem
 
 	// Guilda e Recrutamento
 	guild             *GuildDetails
@@ -791,6 +792,10 @@ func (b *Bot) handleMessage(data []byte) {
 	case "pokes":
 		var ev PokesEvent
 		if err := json.Unmarshal(data, &ev); err == nil {
+			b.mu.Lock()
+			b.availablePokes = ev.List
+			b.mu.Unlock()
+
 			b.updateStatus(func(st *engine.AccountStatus) {
 				st.Extra["pokeCount"] = len(ev.List)
 			})
@@ -1031,6 +1036,8 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	for k, v := range b.bestiarySkips {
 		skips[k] = v
 	}
+	pokes := make([]PokemonItem, len(b.availablePokes))
+	copy(pokes, b.availablePokes)
 	b.mu.RUnlock()
 
 	// Gera fila completa do Bestiário com base no catálogo e nas fraquezas elementais
@@ -1049,7 +1056,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	var activeTarget *BestiaryQueueItem
 
 	if pokedexMode && len(fullQueue) > 0 {
-		// Seleciona o primeiro da fila que não esteja concluído e não tenha sido pulado
+		// 1. Verifica o primeiro alvo pendente do Pokémon ativo atual
 		for _, it := range fullQueue {
 			if it.Score > 0 && !skips[it.SpeciesID] {
 				cpy := it
@@ -1057,7 +1064,60 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 				break
 			}
 		}
-		// Se todos os pendentes foram pulados manualmente, reseta pulos e escolhe o topo
+
+		// 2. Se o Pokémon atual NÃO possui alvo 4.0x (ou se o alvo atual for < 4.0x),
+		// verifica se OUTRO Pokémon na mochila possui alvo 4.0x no Bestiário para troca!
+		if (activeTarget == nil || activeTarget.Offensive < 4.0) && len(pokes) > 1 {
+			for _, p := range pokes {
+				if p.Name == activeName {
+					continue
+				}
+				pTypes := b.catalog.GetPokemonTypes(p.SpeciesID, p.Name)
+				if len(pTypes) == 0 {
+					continue
+				}
+				pQueue := b.catalog.GetBestiaryQueue(pTypes, playerLevel, dexEntries)
+				for _, it := range pQueue {
+					if it.Offensive >= 4.0 && it.Score > 0 && !skips[it.SpeciesID] {
+						// Encontrou alvo 4.0x para outro Pokémon da equipe!
+						b.mu.RLock()
+						s := b.socket
+						b.mu.RUnlock()
+						if s != nil && s.IsConnected() {
+							_ = s.SendJSON(SummonPacket{Type: "poke-summon", PokeID: p.ID})
+							time.Sleep(300 * time.Millisecond)
+							_ = s.SendJSON(JoyHealPacket{Type: "joy-heal"})
+							b.addLog(fmt.Sprintf("🔄 [Troca Estratégica 4.0x] Invocando %s (Lv. %d) [%s] para explorar fraqueza 4.0x contra %s (Lv. %d)!",
+								p.Name, p.Level, strings.Join(pTypes, "/"), it.Name, it.Level))
+						}
+
+						b.mu.Lock()
+						b.activePokemon = p.Name
+						b.activeLevel = p.Level
+						b.activeTypes = pTypes
+						b.mu.Unlock()
+
+						activeName = p.Name
+						activeTypes = pTypes
+						fullQueue = pQueue
+						cpy := it
+						activeTarget = &cpy
+						if h, ok := b.catalog.GetHunt(it.Slug); ok {
+							bestHunt = h
+							offMult = it.Offensive
+							risk = it.Risk
+							found = true
+						}
+						break
+					}
+				}
+				if found && activeTarget != nil && activeTarget.Offensive >= 4.0 {
+					break
+				}
+			}
+		}
+
+		// 3. Se todos os pendentes foram pulados manualmente, reseta pulos e escolhe o topo
 		if activeTarget == nil {
 			for _, it := range fullQueue {
 				if it.Score > 0 {
@@ -1071,7 +1131,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 			}
 		}
 
-		if activeTarget != nil {
+		if activeTarget != nil && !found {
 			if h, ok := b.catalog.GetHunt(activeTarget.Slug); ok {
 				bestHunt = h
 				offMult = activeTarget.Offensive
@@ -1231,10 +1291,18 @@ func (b *Bot) buyBalls(ballID, qty int) {
 	}
 }
 
-// checkAutoSell vende pokémons comuns duplicados que não estejam na equipe
+// checkAutoSell vende pokémons comuns duplicados, preservando 1 exemplar de cada espécie para rotação de fraquezas 4.0x
 func (b *Bot) checkAutoSell(pokes []PokemonItem) {
 	if b.token == "" || len(pokes) == 0 {
 		return
+	}
+
+	// Identifica espécies já protegidas ou existentes na equipe
+	seenSpecies := make(map[int]bool)
+	for _, p := range pokes {
+		if p.Team || p.Starter || p.Shiny || p.Locked || p.Listed {
+			seenSpecies[p.SpeciesID] = true
+		}
 	}
 
 	var toSell []any
@@ -1243,8 +1311,16 @@ func (b *Bot) checkAutoSell(pokes []PokemonItem) {
 		if p.Team || p.Starter || p.Shiny || p.Locked || p.Listed {
 			continue
 		}
-		if p.SellValue > 0 {
-			toSell = append(toSell, p.ID)
+
+		if seenSpecies[p.SpeciesID] {
+			// Já possuímos um exemplar dessa espécie! Este é duplicado/repetido, pode vender.
+			if p.SellValue > 0 {
+				toSell = append(toSell, p.ID)
+			}
+		} else {
+			// Primeiro exemplar desta espécie: preserva na mochila para rotações 4.0x!
+			seenSpecies[p.SpeciesID] = true
+			b.addLog(fmt.Sprintf("🛡️ [Equipe 4.0x] Novo elemento preservado para rotação: %s (Lv. %d)", p.Name, p.Level))
 		}
 	}
 
@@ -1256,7 +1332,7 @@ func (b *Bot) checkAutoSell(pokes []PokemonItem) {
 	var res map[string]any
 	err := b.httpCli.PostJSON("/api/game/pokemon/sell", req, &res)
 	if err == nil {
-		b.addLog(fmt.Sprintf("💰 Vendidos %d Pokémons duplicados/comuns.", len(toSell)))
+		b.addLog(fmt.Sprintf("💰 Vendidos %d Pokémons duplicados/repetidos.", len(toSell)))
 		b.mu.RLock()
 		s := b.socket
 		b.mu.RUnlock()

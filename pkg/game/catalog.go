@@ -288,16 +288,26 @@ func (c *Catalog) getBestiaryQueueLocked(attackerTypes []string, playerLevel int
 			// Já concluído: joga para o fim da fila com pontuação negativa
 			score = -100000.0 - float64(h.Level)
 		} else {
-			// Pontuação para concluir o Bestiário de forma inteligente:
-			// 1. Base sólida para espécies pendentes
-			score = 10000.0
-			// 2. Vantagem elemental ofensiva (4.0x = +4000, 2.0x = +2000, 1.0x = +1000)
-			score += offMult * 1000.0
-			// 3. Proximidade de bater a meta: prioriza fechar monstros que já possuem abates (+60 pts por abate)
-			score += float64(kills) * 60.0
-			// 4. Bônus por nível da rota (mais XP base por monstro)
-			score += float64(h.Level) * 25.0
-			// 5. Penalidade para rotas de alto risco defensivo
+			// Pontuação para foco estrito em Fraquezas 4.0x:
+			// 1. Faixa de Fraqueza (4.0x domina absolutamente sobre 2.0x e 1.0x):
+			if offMult >= 4.0 {
+				score = 50000.0 // Prioridade máxima absoluta para fraqueza quádrupla 4.0x
+			} else if offMult >= 2.0 {
+				score = 20000.0 // Super efetivo 2.0x
+			} else {
+				score = 5000.0 // Neutro / Pouco efetivo
+			}
+
+			// 2. Multiplicador de dano detalhado (+2000 pts por x de dano)
+			score += offMult * 2000.0
+
+			// 3. Nível da rota (mobs de nível mais alto dão mais XP por abate)
+			score += float64(h.Level) * 50.0
+
+			// 4. Abates acumulados (desempate dentro da mesma faixa de fraqueza)
+			score += float64(kills) * 20.0
+
+			// 5. Penalidade para risco defensivo
 			score -= risk * 150.0
 		}
 
