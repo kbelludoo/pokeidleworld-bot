@@ -562,7 +562,6 @@ func (b *Bot) handleMessage(data []byte) {
 			b.mu.Lock()
 			b.lastFieldAt = time.Now()
 			b.isHunting = true
-			oldLevel := b.status.Level
 			b.mu.Unlock()
 
 			b.updateStatus(func(st *engine.AccountStatus) {
@@ -572,14 +571,19 @@ func (b *Bot) handleMessage(data []byte) {
 					st.MaxHP = ev.Hero.MaxHP
 				}
 				if ev.Hero.Level > 0 {
-					st.Level = ev.Hero.Level
+					st.Extra["pokemonLevel"] = ev.Hero.Level
 				}
 			})
 
-			// Se o jogador subiu de nível, re-avalia alvos de fraqueza para caçar mobs de nível maior
-			if oldLevel > 0 && ev.Hero.Level > oldLevel && b.config.Settings.AutoWeakness {
-				b.addLog(fmt.Sprintf("🎉 Nível alcançado: Lv. %d! Re-avaliando rotas com fraqueza...", ev.Hero.Level))
-				b.evaluateAndSwitchWeaknessHunt(false)
+			// Se o Pokémon ativo subiu de nível, registra log
+			b.mu.Lock()
+			oldPokeLevel := b.activeLevel
+			if ev.Hero.Level > 0 {
+				b.activeLevel = ev.Hero.Level
+			}
+			b.mu.Unlock()
+			if oldPokeLevel > 0 && ev.Hero.Level > oldPokeLevel {
+				b.addLog(fmt.Sprintf("🎉 Pokémon subiu para o Nível %d!", ev.Hero.Level))
 			}
 
 			// Verificação de vida baixa para cura automática
@@ -1355,11 +1359,46 @@ func (b *Bot) claimDailyRewards() {
 	_ = b.httpCli.PostJSON("/api/game/daily-kill/claim", map[string]any{}, &dummy)
 }
 
+// refreshCharacterInfo consulta os dados atualizados do treinador (nível, XP, ouro) na API oficial
+func (b *Bot) refreshCharacterInfo() {
+	if b.token == "" {
+		return
+	}
+	var charResp CharacterMeResponse
+	err := b.httpCli.GetJSON("/api/characters/me", &charResp)
+	if err == nil && charResp.Character != nil {
+		ch := charResp.Character
+		b.mu.Lock()
+		oldLevel := b.status.Level
+		b.mu.Unlock()
+
+		b.updateStatus(func(s *engine.AccountStatus) {
+			s.Name = ch.Name
+			s.Level = ch.Level
+			if ch.Gold > 0 {
+				s.Gold = int64(ch.Gold)
+			}
+			s.Extra["trainerName"] = ch.Name
+			s.Extra["trainerLevel"] = ch.Level
+			s.Extra["trainerXP"] = ch.XP
+			s.Extra["lookType"] = ch.LookType
+		})
+
+		if oldLevel > 0 && ch.Level > oldLevel {
+			b.addLog(fmt.Sprintf("🎉 Treinador '%s' avançou para o Nível %d! Re-avaliando rotas de caça...", ch.Name, ch.Level))
+			b.evaluateAndSwitchWeaknessHunt(false)
+		}
+	}
+}
+
 // checkAndClaimPokedex consulta a Pokédex/Bestiário, resgata bônus de +25% XP pendentes e atualiza progresso
 func (b *Bot) checkAndClaimPokedex() bool {
 	if b.token == "" {
 		return false
 	}
+
+	// Mantém as informações do treinador (nível, gold, XP) sempre sincronizadas com a API
+	b.refreshCharacterInfo()
 
 	var res PokedexResponse
 	err := b.httpCli.GetJSON("/api/game/pokedex", &res)

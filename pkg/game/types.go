@@ -329,6 +329,8 @@ type CharacterMeResponse struct {
 		Name       string `json:"name"`
 		Level      int    `json:"level"`
 		XP         int64  `json:"xp"`
+		Gold       int    `json:"gold"`
+		Diamonds   int    `json:"diamonds"`
 		StarterID  int    `json:"starterId"`
 		LookType   int    `json:"lookType"`
 		Gender     string `json:"gender"`
