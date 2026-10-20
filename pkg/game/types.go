@@ -48,6 +48,7 @@ type GameSettings struct {
 	AutoHouseTraining bool   `json:"autoHouseTraining,omitempty"`// Treinar pokemons na Casa
 	AutoRefine       bool   `json:"autoRefine,omitempty"`       // Refinar atributos do titular
 	AutoOpenBoxes    bool   `json:"autoOpenBoxes,omitempty"`    // Abrir caixas de recompensa
+	AutoBoss         bool   `json:"autoBoss,omitempty"`         // Desafiar bosses automáticos
 }
 
 // ==========================================
@@ -486,4 +487,19 @@ type PokemonRefinePacket struct {
 type BoxOpenPacket struct {
 	Type string `json:"type"` // "caixa.abrir"
 	ID   int    `json:"id"`
+}
+
+type BossAutoPacket struct {
+	Type  string `json:"type"`
+	Ativo bool   `json:"ativo"`
+	Key   string `json:"key,omitempty"`
+}
+
+type BossEntrarPacket struct {
+	Type string `json:"type"`
+	Key  string `json:"key"`
+}
+
+type BossSairPacket struct {
+	Type string `json:"type"`
 }

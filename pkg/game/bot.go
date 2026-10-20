@@ -1037,6 +1037,19 @@ func (b *Bot) handleMessage(data []byte) {
 			}
 		}
 
+	case "bossMorto":
+		var ev struct {
+			Nome string `json:"nome"`
+		}
+		_ = json.Unmarshal(data, &ev)
+		b.addLog(fmt.Sprintf("👹 [Boss Morto] Vitória épica contra %s! Drops e essências coletados.", ev.Nome))
+
+	case "bossPerdeu":
+		b.addLog("👹 [Boss] Equipe derrotada pelo Boss. Retornando ao farm de rotas...")
+
+	case "bossSaiu":
+		b.addLog("👹 [Boss] Batalha de Boss finalizada.")
+
 	case "error":
 		var ev struct {
 			Message string `json:"message"`
@@ -1475,6 +1488,11 @@ func (b *Bot) runPeriodicFeatures() {
 	// 5. Moedas de Amigos (solicita lista para retribuir moedas)
 	if cfg.AutoFriendCoins {
 		_ = s.SendJSON(FriendsInfoPacket{Type: "amigos.info"})
+	}
+
+	// 7. Desafio Automático de Bosses (se habilitado)
+	if cfg.AutoBoss {
+		_ = s.SendJSON(BossAutoPacket{Type: "boss.auto", Ativo: true})
 	}
 
 	// 6. Refino de Atributos do Titular (aprimora ataque)
