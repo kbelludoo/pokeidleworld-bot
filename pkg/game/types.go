@@ -1,6 +1,6 @@
 package game
 
-// AccountConfig modelo de configuração lido do accounts.json
+// AccountConfig modelo de configuraÃ§Ã£o lido do accounts.json
 type AccountConfig struct {
 	ID          string          `json:"id"`
 	Name        string          `json:"name"`
@@ -20,25 +20,34 @@ type GameCredentials struct {
 }
 
 type GameSettings struct {
-	HuntTarget      string `json:"huntTarget"`                // Slug da área de caça (ex: "auto", "geodude", "caterpie")
+	HuntTarget      string `json:"huntTarget"`                // Slug da Ã¡rea de caÃ§a (ex: "auto", "geodude", "caterpie")
 	AutoWeakness    bool   `json:"autoWeakness,omitempty"`    // Selecionar rota automaticamente com base na fraqueza dos monstros (vantagem de tipo)
-	AutoHunt        bool   `json:"autoHunt"`                  // Caçada contínua automática
-	AutoCatch       bool   `json:"autoCatch"`                 // Captura automática de monstros derrotados
-	BallID          int    `json:"ballId,omitempty"`          // ID da Pokébola para capturas normais (1 = Poke Ball, 2 = Great Ball, 3 = Ultra Ball)
-	ShinyBallID     int    `json:"shinyBallId,omitempty"`     // ID da Pokébola para Shinies (5 = Master Ball)
-	AutoBuyBalls    bool   `json:"autoBuyBalls,omitempty"`    // Compra automática de Pokébolas quando estoque estiver baixo
-	MinBalls        int    `json:"minBalls,omitempty"`        // Limite mínimo de pokébolas antes de recomprar (default: 20)
+	AutoHunt        bool   `json:"autoHunt"`                  // CaÃ§ada contÃ­nua automÃ¡tica
+	AutoCatch       bool   `json:"autoCatch"`                 // Captura automÃ¡tica de monstros derrotados
+	BallID          int    `json:"ballId,omitempty"`          // ID da PokÃ©bola para capturas normais (1 = Poke Ball, 2 = Great Ball, 3 = Ultra Ball)
+	ShinyBallID     int    `json:"shinyBallId,omitempty"`     // ID da PokÃ©bola para Shinies (5 = Master Ball)
+	AutoBuyBalls    bool   `json:"autoBuyBalls,omitempty"`    // Compra automÃ¡tica de PokÃ©bolas quando estoque estiver baixo
+	MinBalls        int    `json:"minBalls,omitempty"`        // Limite mÃ­nimo de pokÃ©bolas antes de recomprar (default: 20)
 	BuyBallQty      int    `json:"buyBallQty,omitempty"`      // Quantidade a comprar (default: 50)
-	AutoHeal        bool   `json:"autoHeal"`                  // Cura automática via Nurse Joy
-	HealThresholdHP int    `json:"healThresholdHp,omitempty"` // % de vida mínima antes de curar (default: 30)
-	AutoDaily       bool   `json:"autoDaily"`                 // Reivindicar recompensas diárias (/api/game/daily e missões diárias)
-	AutoSell         bool   `json:"autoSell"`                  // Vender pokémons duplicados / comuns sem equipe
-	KeepBestIV       bool   `json:"keepBestIv,omitempty"`      // Preservar pokémons com maior IV ao vender
-	AutoGuildAccept  bool   `json:"autoGuildAccept,omitempty"`  // Aceitar automaticamente convites de guildas com bônus de XP
+	AutoHeal        bool   `json:"autoHeal"`                  // Cura automÃ¡tica via Nurse Joy
+	HealThresholdHP int    `json:"healThresholdHp,omitempty"` // % de vida mÃ­nima antes de curar (default: 30)
+	AutoDaily       bool   `json:"autoDaily"`                 // Reivindicar recompensas diÃ¡rias (/api/game/daily e missÃµes diÃ¡rias)
+	AutoSell         bool   `json:"autoSell"`                  // Vender pokÃ©mons duplicados / comuns sem equipe
+	KeepBestIV       bool   `json:"keepBestIv,omitempty"`      // Preservar pokÃ©mons com maior IV ao vender
+	AutoGuildAccept  bool   `json:"autoGuildAccept,omitempty"`  // Aceitar automaticamente convites de guildas com bÃ´nus de XP
 	AutoGuildRecruit bool   `json:"autoGuildRecruit,omitempty"` // Divulgar procura de guilda no chat periodicamente
 	AutoGuildDonate  bool   `json:"autoGuildDonate,omitempty"`  // Doar ouro excedente para a guilda
-	AutoPokedexClaim bool   `json:"autoPokedexClaim,omitempty"` // Reivindicar automaticamente bônus +25% de XP da Pokédex (100 abates)
-	PokedexFarmMode  bool   `json:"pokedexFarmMode,omitempty"`  // Focar em rotas para completar 100 abates do Bestiário e rotacionar
+	AutoPokedexClaim bool   `json:"autoPokedexClaim,omitempty"` // Reivindicar automaticamente bÃ´nus +25% de XP da PokÃ©dex (100 abates)
+	PokedexFarmMode  bool   `json:"pokedexFarmMode,omitempty"`  // Focar em rotas para completar 100 abates do BestiÃ¡rio e rotacionar
+	AutoEvolve       bool   `json:"autoEvolve,omitempty"`       // Evoluir automaticamente pokemons
+	AutoBattlePass   bool   `json:"autoBattlePass,omitempty"`   // Resgatar passe diário
+	AutoGyms         bool   `json:"autoGyms,omitempty"`         // Desafiar ginásios para buff de +10%
+	AutoHatchery     bool   `json:"autoHatchery,omitempty"`     // Colocar ovos na chocadeira
+	AutoOfferings    bool   `json:"autoOfferings,omitempty"`    // Girar oferendas no Altar
+	AutoFriendCoins  bool   `json:"autoFriendCoins,omitempty"`  // Trocar Friendship Coins
+	AutoHouseTraining bool   `json:"autoHouseTraining,omitempty"`// Treinar pokemons na Casa
+	AutoRefine       bool   `json:"autoRefine,omitempty"`       // Refinar atributos do titular
+	AutoOpenBoxes    bool   `json:"autoOpenBoxes,omitempty"`    // Abrir caixas de recompensa
 }
 
 // ==========================================
@@ -108,7 +117,7 @@ type GuildActionPacket struct {
 	Action   string `json:"action"`             // "respond", "leave", "donate", "tribute", "invite"
 	InviteID any    `json:"inviteId,omitempty"` // ID do convite ao responder
 	Accept   bool   `json:"accept,omitempty"`   // true para aceitar convite
-	Amount   int    `json:"amount,omitempty"`   // Quantidade para doação de ouro ou tributo
+	Amount   int    `json:"amount,omitempty"`   // Quantidade para doaÃ§Ã£o de ouro ou tributo
 	Name     string `json:"name,omitempty"`     // Nome do jogador ao convidar
 }
 
@@ -418,4 +427,63 @@ type BestiaryQueueItem struct {
 	Claimed     bool     `json:"claimed"`
 	CanClaim    bool     `json:"canClaim"`
 	Score       float64  `json:"score"`
+}
+
+// Advanced Feature Outbound Packets
+
+type PokemonEvolvePacket struct {
+	Type      string `json:"type"`      // "pokemon.evoluir"
+	PokemonID any    `json:"pokemonId"`
+	AlvoID    int    `json:"alvoId"`
+}
+
+type BattlePassClaimPacket struct {
+	Type string `json:"type"` // "passe.resgatar"
+}
+
+type GymChallengePacket struct {
+	Type string `json:"type"` // "ginasio.desafiar"
+	Tipo string `json:"tipo"` // ex: "GRASS", "WATER", "FIRE"
+}
+
+type EggHatchPlacePacket struct {
+	Type string `json:"type"` // "chocadeira.colocar"
+	Slot int    `json:"slot"`
+	Ovo  int    `json:"ovo"`
+}
+
+type ShinyEggCraftPacket struct {
+	Type string `json:"type"` // "ovoShiny.fabricar"
+}
+
+type AltarOfferingsAllPacket struct {
+	Type string `json:"type"` // "oferenda.tudo"
+}
+
+type FriendCoinsPacket struct {
+	Type     string `json:"type"` // "amigo.coins"
+	AmigoID  any    `json:"amigoId"`
+	Valor    int    `json:"valor"`
+}
+
+type FriendsInfoPacket struct {
+	Type string `json:"type"` // "amigos.info"
+}
+
+type HouseXpShareChoosePacket struct {
+	Type      string `json:"type"`      // "xpshare.escolher"
+	CasaID    int    `json:"casaId"`
+	Slot      int    `json:"slot"`
+	PokemonID any    `json:"pokemonId"`
+}
+
+type PokemonRefinePacket struct {
+	Type      string `json:"type"`      // "pokemon.refinar"
+	PokemonID any    `json:"pokemonId"`
+	Stat      string `json:"stat"`      // "atk", "def", "hp", "speed"
+}
+
+type BoxOpenPacket struct {
+	Type string `json:"type"` // "caixa.abrir"
+	ID   int    `json:"id"`
 }

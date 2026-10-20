@@ -2,6 +2,7 @@ package game
 
 import (
 	"bytes"
+	"fmt"
 	_ "embed"
 	"encoding/json"
 	"log"
@@ -15,6 +16,20 @@ var embeddedCatalogJSON []byte
 
 //go:embed species_types.json
 var embeddedSpeciesJSON []byte
+
+//go:embed creatures.json
+var embeddedCreaturesJSON []byte
+
+type CreatureEvolutionInfo struct {
+	PokeID      int    `json:"pokeId"`
+	Name        string `json:"name"`
+	EvolvesToID int    `json:"evolvesToId"`
+	EvolveLevel int    `json:"evolveLevel"`
+}
+
+type CreaturesContainer struct {
+	Creatures []CreatureEvolutionInfo `json:"creatures"`
+}
 
 type CatalogHunt struct {
 	Slug  string `json:"slug"`
@@ -50,6 +65,7 @@ type Catalog struct {
 	ballsByID       map[int]CatalogBall
 	speciesByID     map[int]SpeciesTypeInfo
 	speciesByName   map[string]SpeciesTypeInfo
+	creaturesByID   map[int]CreatureEvolutionInfo
 	mu              sync.RWMutex
 }
 
@@ -58,7 +74,7 @@ var (
 	globalCatalogOnce sync.Once
 )
 
-// GetGlobalCatalog retorna a instância única do catálogo de caçadas, pokébolas e tipos
+// GetGlobalCatalog retorna a instÃ¢ncia Ãºnica do catÃ¡logo de caÃ§adas, pokÃ©bolas e tipos
 func GetGlobalCatalog() *Catalog {
 	globalCatalogOnce.Do(func() {
 		cat := &Catalog{
@@ -66,6 +82,7 @@ func GetGlobalCatalog() *Catalog {
 			ballsByID:     make(map[int]CatalogBall),
 			speciesByID:   make(map[int]SpeciesTypeInfo),
 			speciesByName: make(map[string]SpeciesTypeInfo),
+			creaturesByID: make(map[int]CreatureEvolutionInfo),
 		}
 
 		catDataBytes := bytes.TrimPrefix(embeddedCatalogJSON, []byte("\xef\xbb\xbf"))
@@ -90,6 +107,18 @@ func GetGlobalCatalog() *Catalog {
 				for _, sp := range speciesList {
 					cat.speciesByID[sp.ID] = sp
 					cat.speciesByName[strings.ToLower(strings.TrimSpace(sp.Name))] = sp
+				}
+			}
+		}
+
+				crDataBytes := bytes.TrimPrefix(embeddedCreaturesJSON, []byte("\xef\xbb\xbf"))
+		if len(crDataBytes) > 0 {
+			var container CreaturesContainer
+			if err := json.Unmarshal(crDataBytes, &container); err != nil {
+				log.Printf("[Catalog] Erro ao analisar creatures.json: %v", err)
+			} else {
+				for _, cr := range container.Creatures {
+					cat.creaturesByID[cr.PokeID] = cr
 				}
 			}
 		}
@@ -146,7 +175,7 @@ func (c *Catalog) GetAllHunts() []CatalogHunt {
 	return res
 }
 
-// GetPokemonTypes retorna os tipos do Pokémon por ID da espécie ou por nome
+// GetPokemonTypes retorna os tipos do PokÃ©mon por ID da espÃ©cie ou por nome
 func (c *Catalog) GetPokemonTypes(speciesID int, name string) []string {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -181,7 +210,7 @@ func (c *Catalog) GetPokemonTypes(speciesID int, name string) []string {
 	return nil
 }
 
-// GetSpeciesIDByName retorna o ID da espécie pelo nome ou slug, com suporte a apelidos e variações
+// GetSpeciesIDByName retorna o ID da espÃ©cie pelo nome ou slug, com suporte a apelidos e variaÃ§Ãµes
 func (c *Catalog) GetSpeciesIDByName(name string) int {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -207,7 +236,7 @@ func (c *Catalog) getSpeciesIDByNameLocked(name string) int {
 	return 0
 }
 
-// GetSpeciesByID retorna as informações da espécie pelo ID
+// GetSpeciesByID retorna as informaÃ§Ãµes da espÃ©cie pelo ID
 func (c *Catalog) GetSpeciesByID(id int) (SpeciesTypeInfo, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -215,7 +244,7 @@ func (c *Catalog) GetSpeciesByID(id int) (SpeciesTypeInfo, bool) {
 	return sp, ok
 }
 
-// GetBestiaryQueue retorna a fila completa e ordenada de espécies para fechar o Bestiário
+// GetBestiaryQueue retorna a fila completa e ordenada de espÃ©cies para fechar o BestiÃ¡rio
 func (c *Catalog) GetBestiaryQueue(attackerTypes []string, playerLevel int, dexEntries map[int]PokedexSpeciesEntry) []BestiaryQueueItem {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -227,7 +256,7 @@ func (c *Catalog) getBestiaryQueueLocked(attackerTypes []string, playerLevel int
 		playerLevel = 1
 	}
 
-	// Agrupa caçadas por espécie única acessível para o nível do treinador
+	// Agrupa caÃ§adas por espÃ©cie Ãºnica acessÃ­vel para o nÃ­vel do treinador
 	bestHuntBySpecies := make(map[int]CatalogHunt)
 	for _, h := range c.data.Hunts {
 		if h.Level <= 0 || h.Level > playerLevel {
@@ -285,13 +314,13 @@ func (c *Catalog) getBestiaryQueueLocked(attackerTypes []string, playerLevel int
 		isComplete := claimed || kills >= 100
 
 		if isComplete {
-			// Já concluído: joga para o fim da fila com pontuação negativa
+			// JÃ¡ concluÃ­do: joga para o fim da fila com pontuaÃ§Ã£o negativa
 			score = -100000.0 - float64(h.Level)
 		} else {
-			// Pontuação para foco estrito em Fraquezas 4.0x:
+			// PontuaÃ§Ã£o para foco estrito em Fraquezas 4.0x:
 			// 1. Faixa de Fraqueza (4.0x domina absolutamente sobre 2.0x e 1.0x):
 			if offMult >= 4.0 {
-				score = 50000.0 // Prioridade máxima absoluta para fraqueza quádrupla 4.0x
+				score = 50000.0 // Prioridade mÃ¡xima absoluta para fraqueza quÃ¡drupla 4.0x
 			} else if offMult >= 2.0 {
 				score = 20000.0 // Super efetivo 2.0x
 			} else {
@@ -301,7 +330,7 @@ func (c *Catalog) getBestiaryQueueLocked(attackerTypes []string, playerLevel int
 			// 2. Multiplicador de dano detalhado (+2000 pts por x de dano)
 			score += offMult * 2000.0
 
-			// 3. Nível da rota (mobs de nível mais alto dão mais XP por abate)
+			// 3. NÃ­vel da rota (mobs de nÃ­vel mais alto dÃ£o mais XP por abate)
 			score += float64(h.Level) * 50.0
 
 			// 4. Abates acumulados (desempate dentro da mesma faixa de fraqueza)
@@ -338,12 +367,12 @@ func (c *Catalog) getBestiaryQueueLocked(attackerTypes []string, playerLevel int
 	return items
 }
 
-// FindBestWeaknessHunt encontra a área de caça ideal onde os monstros têm maior fraqueza contra o Pokémon do jogador
+// FindBestWeaknessHunt encontra a Ã¡rea de caÃ§a ideal onde os monstros tÃªm maior fraqueza contra o PokÃ©mon do jogador
 func (c *Catalog) FindBestWeaknessHunt(attackerTypes []string, playerLevel int) (CatalogHunt, float64, float64, bool) {
 	return c.FindBestHunt(attackerTypes, playerLevel, nil, false)
 }
 
-// FindBestHunt encontra a área de caça ideal considerando fraqueza elemental, nível e progresso do Bestiário (100 abates)
+// FindBestHunt encontra a Ã¡rea de caÃ§a ideal considerando fraqueza elemental, nÃ­vel e progresso do BestiÃ¡rio (100 abates)
 func (c *Catalog) FindBestHunt(attackerTypes []string, playerLevel int, dexEntries map[int]PokedexSpeciesEntry, pokedexMode bool) (CatalogHunt, float64, float64, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -352,7 +381,7 @@ func (c *Catalog) FindBestHunt(attackerTypes []string, playerLevel int, dexEntri
 		playerLevel = 1
 	}
 
-	// 1. Se modo Bestiário estiver ativo e houver dados da Pokédex, segue estritamente a fila prioritária do Bestiário
+	// 1. Se modo BestiÃ¡rio estiver ativo e houver dados da PokÃ©dex, segue estritamente a fila prioritÃ¡ria do BestiÃ¡rio
 	if pokedexMode && len(dexEntries) > 0 {
 		queue := c.getBestiaryQueueLocked(attackerTypes, playerLevel, dexEntries)
 		if len(queue) > 0 && queue[0].Score > 0 {
@@ -363,7 +392,7 @@ func (c *Catalog) FindBestHunt(attackerTypes []string, playerLevel int, dexEntri
 		}
 	}
 
-	// 2. Modo Padrão / Fallback: busca rota de maior XP por fraqueza e nível
+	// 2. Modo PadrÃ£o / Fallback: busca rota de maior XP por fraqueza e nÃ­vel
 	var bestHunt CatalogHunt
 	bestScore := -999999.0
 	bestOffensive := 1.0
@@ -397,3 +426,30 @@ func (c *Catalog) FindBestHunt(attackerTypes []string, playerLevel int, dexEntri
 	return bestHunt, bestOffensive, bestRisk, found
 }
 
+
+// GetEvolution verifica se uma espécie pode evoluir no nível fornecido e retorna o ID da próxima forma
+func (c *Catalog) GetEvolution(speciesID, currentLevel int) (int, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	cr, ok := c.creaturesByID[speciesID]
+	if !ok || cr.EvolvesToID <= 0 || cr.EvolveLevel <= 0 {
+		return 0, false
+	}
+	if currentLevel >= cr.EvolveLevel {
+		return cr.EvolvesToID, true
+	}
+	return 0, false
+}
+
+// GetSpeciesName retorna o nome canônico da espécie por ID
+func (c *Catalog) GetSpeciesName(speciesID int) string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if cr, ok := c.creaturesByID[speciesID]; ok && cr.Name != "" {
+		return cr.Name
+	}
+	if sp, ok := c.speciesByID[speciesID]; ok && sp.Name != "" {
+		return sp.Name
+	}
+	return fmt.Sprintf("#%d", speciesID)
+}

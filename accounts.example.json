@@ -1,32 +1,41 @@
-[
-  {
-    "id": "acc-1",
-    "name": "Treinador Principal",
-    "enabled": true,
-    "proxy": "",
-    "localIp": "",
-    "credentials": {
-      "email": "seu_email@exemplo.com",
-      "password": "sua_senha",
-      "token": "",
-      "refreshToken": ""
-    },
-    "settings": {
-      "huntTarget": "auto",
-      "autoWeakness": true,
-      "autoHunt": true,
-      "autoCatch": true,
-      "ballId": 1,
-      "shinyBallId": 3,
-      "autoBuyBalls": true,
-      "minBalls": 20,
-      "buyBallQty": 50,
-      "autoHeal": true,
-      "healThresholdHp": 30,
-      "autoDaily": true,
-      "autoSell": true,
-      "autoGuildAccept": true,
-      "autoGuildRecruit": true
-    }
-  }
-]
+﻿{
+    "id":  "acc-1",
+    "name":  "Treinador Principal",
+    "enabled":  true,
+    "proxy":  "",
+    "localIp":  "",
+    "credentials":  {
+                        "email":  "seu_email@exemplo.com",
+                        "password":  "sua_senha",
+                        "token":  "",
+                        "refreshToken":  ""
+                    },
+    "settings":  {
+                     "huntTarget":  "auto",
+                     "autoWeakness":  true,
+                     "autoHunt":  true,
+                     "autoCatch":  true,
+                     "ballId":  1,
+                     "shinyBallId":  3,
+                     "autoBuyBalls":  true,
+                     "minBalls":  20,
+                     "buyBallQty":  50,
+                     "autoHeal":  true,
+                     "healThresholdHp":  30,
+                     "autoDaily":  true,
+                     "autoSell":  true,
+                     "autoGuildAccept":  true,
+                     "autoGuildRecruit":  true,
+                     "autoPokedexClaim":  true,
+                     "pokedexFarmMode":  true,
+                     "autoEvolve":  true,
+                     "autoBattlePass":  true,
+                     "autoGyms":  true,
+                     "autoHatchery":  true,
+                     "autoOfferings":  true,
+                     "autoFriendCoins":  true,
+                     "autoHouseTraining":  true,
+                     "autoRefine":  true,
+                     "autoOpenBoxes":  true
+                 }
+}

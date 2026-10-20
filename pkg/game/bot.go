@@ -20,11 +20,11 @@ import (
 )
 
 var recruitPhrases = []string{
-	"Procuro guild ativa com bônus de XP, nick: %s (farmando 24/7)",
+	"Procuro guild ativa com bÃ´nus de XP, nick: %s (farmando 24/7)",
 	"Opa, alguma guilda ativa com vaga pra quem joga todo dia? nick: %s",
-	"Procurando guild com bônus de xp, nick: %s on direto",
-	"Alguém com vaga em guilda ativa? nick: %s (focado em xp)",
-	"Procuro guild com bônus de XP, nick %s ativo direto aqui",
+	"Procurando guild com bÃ´nus de xp, nick: %s on direto",
+	"AlguÃ©m com vaga em guilda ativa? nick: %s (focado em xp)",
+	"Procuro guild com bÃ´nus de XP, nick %s ativo direto aqui",
 	"Salve galera, alguma guilda com vaga aberta? nick: %s",
 	"Alguma guilda ativa recrutando? Nick: %s jogando full time",
 	"Opa, guild ativa recrutando? Nick %s farmando direto aqui",
@@ -36,7 +36,7 @@ func getRandomRecruitMessage(tName string) string {
 }
 
 func getRandomRecruitDelay() time.Duration {
-	// Intervalo aleatório de 2h a 8h (120 a 480 minutos) com variação de segundos
+	// Intervalo aleatÃ³rio de 2h a 8h (120 a 480 minutos) com variaÃ§Ã£o de segundos
 	minutes := 120 + rand.Intn(361)
 	seconds := rand.Intn(60)
 	return time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second
@@ -62,7 +62,7 @@ type Bot struct {
 	httpCli *network.HTTPClient
 	catalog *Catalog
 
-	// Sessão e autenticação
+	// SessÃ£o e autenticaÃ§Ã£o
 	token         string
 	refreshToken  string
 	targetSlug    string
@@ -87,7 +87,7 @@ type Bot struct {
 	lastRecruitPingAt time.Time
 	nextRecruitPingAt time.Time
 
-	// Bestiário e Pokédex
+	// BestiÃ¡rio e PokÃ©dex
 	pokedexSpecies     map[int]PokedexSpeciesEntry
 	lastPokedexCheckAt time.Time
 	bestiarySkips      map[int]bool
@@ -104,12 +104,12 @@ type Bot struct {
 func NewBot(cfg AccountConfig) *Bot {
 	cat := GetGlobalCatalog()
 
-	// Calibrar padrões inteligentes
+	// Calibrar padrÃµes inteligentes
 	if cfg.Settings.BallID <= 0 {
 		cfg.Settings.BallID = 1 // Poke Ball
 	}
 	if cfg.Settings.ShinyBallID <= 0 || cfg.Settings.ShinyBallID == 5 {
-		cfg.Settings.ShinyBallID = 3 // Ultra Ball (Master Ball ID 5 é bloqueada pelo servidor em Shinies)
+		cfg.Settings.ShinyBallID = 3 // Ultra Ball (Master Ball ID 5 Ã© bloqueada pelo servidor em Shinies)
 	}
 	if cfg.Settings.MinBalls <= 0 {
 		cfg.Settings.MinBalls = 20
@@ -124,14 +124,14 @@ func NewBot(cfg AccountConfig) *Bot {
 		cfg.Settings.AutoWeakness = true
 		cfg.Settings.HuntTarget = "auto"
 	}
-	// Habilitar auto-guild por padrão se não definido
+	// Habilitar auto-guild por padrÃ£o se nÃ£o definido
 	if !cfg.Settings.AutoGuildAccept {
 		cfg.Settings.AutoGuildAccept = true
 	}
 	if !cfg.Settings.AutoGuildRecruit {
 		cfg.Settings.AutoGuildRecruit = true
 	}
-	// Habilitar estratégia de Bestiário por padrão
+	// Habilitar estratÃ©gia de BestiÃ¡rio por padrÃ£o
 	if !cfg.Settings.AutoPokedexClaim {
 		cfg.Settings.AutoPokedexClaim = true
 	}
@@ -210,20 +210,20 @@ func (b *Bot) Init(ctx context.Context) error {
 				s.Extra["trainerName"] = ch.Name
 				s.Extra["lookType"] = ch.LookType
 			})
-			log.Printf("[%s] Autenticado com sucesso como treinador '%s' (Nível %d)", b.ID(), ch.Name, ch.Level)
+			log.Printf("[%s] Autenticado com sucesso como treinador '%s' (NÃ­vel %d)", b.ID(), ch.Name, ch.Level)
 			return nil
 		}
 
 		// Se o token falhou e temos refreshToken, tenta renovar
 		if b.refreshToken != "" {
-			log.Printf("[%s] Token expirado. Tentando renovação via /api/auth/refresh...", b.ID())
+			log.Printf("[%s] Token expirado. Tentando renovaÃ§Ã£o via /api/auth/refresh...", b.ID())
 			if b.refreshAccessToken() {
 				return nil
 			}
 		}
 	}
 
-	// 2. Se o usuário forneceu refreshToken diretamente
+	// 2. Se o usuÃ¡rio forneceu refreshToken diretamente
 	if b.token == "" && b.refreshToken != "" {
 		log.Printf("[%s] Obtendo novo accessToken a partir do refreshToken...", b.ID())
 		if b.refreshAccessToken() {
@@ -261,9 +261,9 @@ func (b *Bot) Init(ctx context.Context) error {
 			return nil
 		}
 
-		log.Printf("[%s] Login automático via CDP não completou (%v).", b.ID(), err)
-		log.Printf("[%s] 💡 AVISO: O login web do Poke Idle World exige Turnstile Anti-Robô.", b.ID())
-		log.Printf("[%s] 👉 Para conectar imediatamente, pegue o accessToken no navegador (DevTools > SessionStorage > pokeweb:tokens) e cole em 'credentials.token' no accounts.json ou envie via Dashboard: http://localhost:3001/api/ticket", b.ID())
+		log.Printf("[%s] Login automÃ¡tico via CDP nÃ£o completou (%v).", b.ID(), err)
+		log.Printf("[%s] ðŸ’¡ AVISO: O login web do Poke Idle World exige Turnstile Anti-RobÃ´.", b.ID())
+		log.Printf("[%s] ðŸ‘‰ Para conectar imediatamente, pegue o accessToken no navegador (DevTools > SessionStorage > pokeweb:tokens) e cole em 'credentials.token' no accounts.json ou envie via Dashboard: http://localhost:3001/api/ticket", b.ID())
 		b.updateStatus(func(s *engine.AccountStatus) {
 			s.Status = "Aguardando token/ticket"
 		})
@@ -276,7 +276,7 @@ func (b *Bot) Init(ctx context.Context) error {
 	return nil
 }
 
-// Run executa a conexão com o WebSocket e os loops de jogo
+// Run executa a conexÃ£o com o WebSocket e os loops de jogo
 func (b *Bot) Run(ctx context.Context) error {
 	atomic.StoreInt32(&b.running, 1)
 	defer atomic.StoreInt32(&b.running, 0)
@@ -299,7 +299,7 @@ func (b *Bot) Run(ctx context.Context) error {
 			case t := <-b.ticketChan:
 				b.token = t
 				b.httpCli.SetHeader("Authorization", "Bearer "+b.token)
-				log.Printf("[%s] Token recebido via SupplyTicket. Iniciando conexão...", b.ID())
+				log.Printf("[%s] Token recebido via SupplyTicket. Iniciando conexÃ£o...", b.ID())
 			case <-time.After(5 * time.Second):
 				continue
 			}
@@ -336,6 +336,13 @@ func (b *Bot) Run(ctx context.Context) error {
 			b.updateStatus(func(s *engine.AccountStatus) {
 				s.Status = "Erro de conexão (re-tentando...)"
 			})
+			if (strings.Contains(err.Error(), "4001") || strings.Contains(err.Error(), "unauthorized")) && b.refreshToken != "" {
+				log.Printf("[%s] Token inválido/expirado detectado (4001). Tentando renovar via refreshToken...", b.ID())
+				if b.refreshAccessToken() {
+					log.Printf("[%s] 🎉 Token renovado com sucesso! Reconectando imediatamente...", b.ID())
+					continue
+				}
+			}
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
@@ -354,7 +361,7 @@ func (b *Bot) Run(ctx context.Context) error {
 		})
 		b.addLog("Conectado ao servidor Poke Idle World.")
 
-		// Envia pacotes iniciais de sincronização
+		// Envia pacotes iniciais de sincronizaÃ§Ã£o
 		_ = socket.SendJSON(map[string]any{"type": "pokes-get"})
 		_ = socket.SendJSON(map[string]any{"type": "balls-get"})
 		_ = socket.SendJSON(map[string]any{"type": "autohelper-get"})
@@ -363,7 +370,7 @@ func (b *Bot) Run(ctx context.Context) error {
 		_ = socket.SendJSON(GuildGetPacket{Type: "guild-get", WithList: true})
 		go b.checkAndClaimPokedex()
 
-		// Entra na área de caça se AutoHunt estiver habilitado e rota já estiver definida
+		// Entra na Ã¡rea de caÃ§a se AutoHunt estiver habilitado e rota jÃ¡ estiver definida
 		b.mu.RLock()
 		currentSlug := b.targetSlug
 		b.mu.RUnlock()
@@ -371,7 +378,7 @@ func (b *Bot) Run(ctx context.Context) error {
 			b.sendEnterHunt(false)
 		}
 
-		// Loop de supervisão interna da conexão
+		// Loop de supervisÃ£o interna da conexÃ£o
 		runErr := b.superviseSession(ctx)
 		socket.Close()
 
@@ -387,6 +394,14 @@ func (b *Bot) Run(ctx context.Context) error {
 			b.addLog("Sessão aberta em outro dispositivo/aba (código 4005). Aguardando 30s para não derrubar o jogador...")
 			log.Printf("[%s] Sessão aberta no navegador (close 4005). Aguardando 30 segundos...", b.ID())
 			reconnectWait = 30 * time.Second
+		} else if runErr != nil && (strings.Contains(runErr.Error(), "4001") || strings.Contains(runErr.Error(), "unauthorized")) {
+			log.Printf("[%s] Token expirado durante a sessão (close 4001). Tentando renovar via refreshToken...", b.ID())
+			if b.refreshAccessToken() {
+				log.Printf("[%s] 🎉 Token renovado com sucesso após 4001! Reconectando imediatamente...", b.ID())
+				reconnectWait = 1 * time.Second
+			} else {
+				reconnectWait = 5 * time.Second
+			}
 		} else {
 			log.Printf("[%s] Conexão encerrada. Reconectando em 3 segundos...", b.ID())
 		}
@@ -399,7 +414,7 @@ func (b *Bot) Run(ctx context.Context) error {
 	}
 }
 
-// superviseSession monitora keepalive, watchdog de caça e tarefas periódicas
+// superviseSession monitora keepalive, watchdog de caÃ§a e tarefas periÃ³dicas
 func (b *Bot) superviseSession(ctx context.Context) error {
 	pingTicker := time.NewTicker(25 * time.Second)
 	defer pingTicker.Stop()
@@ -425,13 +440,13 @@ func (b *Bot) superviseSession(ctx context.Context) error {
 			b.updateStatus(func(s *engine.AccountStatus) {
 				s.Status = "Desconectado"
 			})
-			b.addLog(fmt.Sprintf("Conexão WebSocket interrompida: %v", err))
+			b.addLog(fmt.Sprintf("ConexÃ£o WebSocket interrompida: %v", err))
 			return err
 
 		case newTicket := <-b.ticketChan:
 			b.token = newTicket
 			b.httpCli.SetHeader("Authorization", "Bearer "+b.token)
-			b.addLog("Novo token aplicado. Reiniciando sessão...")
+			b.addLog("Novo token aplicado. Reiniciando sessÃ£o...")
 			return fmt.Errorf("token atualizado")
 
 		case <-pingTicker.C:
@@ -452,11 +467,11 @@ func (b *Bot) superviseSession(ctx context.Context) error {
 			b.mu.RUnlock()
 
 			if s != nil && s.IsConnected() && autoHunt && !paused {
-				// Se estiver caçando e sem atualização do campo por mais de 12 segundos, re-envia enter-hunt
+				// Se estiver caÃ§ando e sem atualizaÃ§Ã£o do campo por mais de 12 segundos, re-envia enter-hunt
 				if hunting && time.Since(lastField) > 12*time.Second {
 					b.sendEnterHunt(true)
 				}
-				// Solicita atualização periódica do analyzer a cada tick do watchdog
+				// Solicita atualizaÃ§Ã£o periÃ³dica do analyzer a cada tick do watchdog
 				_ = s.SendJSON(map[string]any{"type": "analyzer-get"})
 			}
 
@@ -476,7 +491,7 @@ func (b *Bot) superviseSession(ctx context.Context) error {
 				// 1. Atualiza dados e lista da guilda a cada 30 segundos
 				_ = s.SendJSON(GuildGetPacket{Type: "guild-get", WithList: true})
 
-				// 2. Se estiver sem guilda e autoRecruit estiver ativo, envia mensagem no canal help com intervalo aleatório entre 2h e 8h
+				// 2. Se estiver sem guilda e autoRecruit estiver ativo, envia mensagem no canal help com intervalo aleatÃ³rio entre 2h e 8h
 				if currentGuild == nil && autoRecruit && (nextPing.IsZero() || time.Now().After(nextPing)) {
 					nextDelay := getRandomRecruitDelay()
 					b.mu.Lock()
@@ -490,7 +505,7 @@ func (b *Bot) superviseSession(ctx context.Context) error {
 						Channel: "help",
 						Body:    msg,
 					})
-					b.addLog(fmt.Sprintf("📢 [Guilda] Anúncio aleatório enviado no chat: \"%s\" (próximo sorteado em %s)", msg, formatDurationHuman(nextDelay)))
+					b.addLog(fmt.Sprintf("ðŸ“¢ [Guilda] AnÃºncio aleatÃ³rio enviado no chat: \"%s\" (prÃ³ximo sorteado em %s)", msg, formatDurationHuman(nextDelay)))
 				}
 			}
 
@@ -534,7 +549,7 @@ func (b *Bot) handleMessage(data []byte) {
 			b.mu.Unlock()
 
 			if s != nil {
-				// Responde com o campo de visão exigido pelo servidor
+				// Responde com o campo de visÃ£o exigido pelo servidor
 				_ = s.SendJSON(ViewPacket{Type: "view", HC: 15, HR: 9})
 			}
 
@@ -553,7 +568,7 @@ func (b *Bot) handleMessage(data []byte) {
 				st.Extra["matchupDetail"] = desc
 				st.Extra["enemyTypes"] = strings.Join(targetTypes, " / ")
 			})
-			b.addLog(fmt.Sprintf("Entrou na rota de caça: %s (%s) | %s", areaName, ev.Slug, desc))
+			b.addLog(fmt.Sprintf("Entrou na rota de caÃ§a: %s (%s) | %s", areaName, ev.Slug, desc))
 		}
 
 	case "field":
@@ -575,7 +590,7 @@ func (b *Bot) handleMessage(data []byte) {
 				}
 			})
 
-			// Se o Pokémon ativo subiu de nível, registra log
+			// Se o PokÃ©mon ativo subiu de nÃ­vel, registra log
 			b.mu.Lock()
 			oldPokeLevel := b.activeLevel
 			if ev.Hero.Level > 0 {
@@ -583,10 +598,10 @@ func (b *Bot) handleMessage(data []byte) {
 			}
 			b.mu.Unlock()
 			if oldPokeLevel > 0 && ev.Hero.Level > oldPokeLevel {
-				b.addLog(fmt.Sprintf("🎉 Pokémon subiu para o Nível %d!", ev.Hero.Level))
+				b.addLog(fmt.Sprintf("ðŸŽ‰ PokÃ©mon subiu para o NÃ­vel %d!", ev.Hero.Level))
 			}
 
-			// Verificação de vida baixa para cura automática
+			// VerificaÃ§Ã£o de vida baixa para cura automÃ¡tica
 			if ev.Hero.MaxHP > 0 && b.config.Settings.AutoHeal {
 				hpPct := (ev.Hero.HP * 100) / ev.Hero.MaxHP
 				if hpPct <= b.config.Settings.HealThresholdHP {
@@ -595,7 +610,7 @@ func (b *Bot) handleMessage(data []byte) {
 					b.mu.RUnlock()
 					if s != nil {
 						_ = s.SendJSON(JoyHealPacket{Type: "joy-heal"})
-						b.addLog(fmt.Sprintf("Vida crítica (%d%%). Nurse Joy curou a equipe!", hpPct))
+						b.addLog(fmt.Sprintf("Vida crÃ­tica (%d%%). Nurse Joy curou a equipe!", hpPct))
 					}
 				}
 			}
@@ -615,7 +630,7 @@ func (b *Bot) handleMessage(data []byte) {
 			_ = s.SendJSON(map[string]any{"type": "analyzer-get"})
 		}
 
-		// Rastreia e atualiza localmente os abates da espécie caçada
+		// Rastreia e atualiza localmente os abates da espÃ©cie caÃ§ada
 		hit100 := false
 		if currentSlug != "" {
 			spID := b.catalog.GetSpeciesIDByName(currentSlug)
@@ -641,13 +656,13 @@ func (b *Bot) handleMessage(data []byte) {
 			}
 		}
 
-		// Se atingiu a meta exata de 100 abates ou múltiplo de 10, consulta/resgata bônus na Pokédex
+		// Se atingiu a meta exata de 100 abates ou mÃºltiplo de 10, consulta/resgata bÃ´nus na PokÃ©dex
 		if hit100 || (kCount > 0 && kCount%10 == 0) {
 			go b.checkAndClaimPokedex()
 		}
 
 	case "field-lost":
-		b.addLog("A equipe foi derrotada em batalha. Curando com Nurse Joy e reiniciando caça...")
+		b.addLog("A equipe foi derrotada em batalha. Curando com Nurse Joy e reiniciando caÃ§a...")
 		b.mu.RLock()
 		s := b.socket
 		b.mu.RUnlock()
@@ -667,7 +682,7 @@ func (b *Bot) handleMessage(data []byte) {
 		b.mu.Unlock()
 		b.updateStatus(func(st *engine.AccountStatus) {
 			if !b.paused {
-				st.Status = "idle (fora de caça)"
+				st.Status = "idle (fora de caÃ§a)"
 			}
 		})
 		if b.config.Settings.AutoHunt && !b.paused {
@@ -709,7 +724,7 @@ func (b *Bot) handleMessage(data []byte) {
 						if item.Shiny {
 							chosenBall = shinyBallID
 							if chosenBall == 5 {
-								chosenBall = 3 // Fallback para Ultra Ball (Master Ball é bloqueada para Shinies)
+								chosenBall = 3 // Fallback para Ultra Ball (Master Ball Ã© bloqueada para Shinies)
 							}
 						}
 						_ = s.SendJSON(CatchPacket{
@@ -717,7 +732,7 @@ func (b *Bot) handleMessage(data []byte) {
 							PendingID: item.ID,
 							BallID:    chosenBall,
 						})
-						b.addLog(fmt.Sprintf("Pokébola (ID %d) lançada em monstro pendente #%v (Shiny: %v)", chosenBall, item.SpeciesID, item.Shiny))
+						b.addLog(fmt.Sprintf("PokÃ©bola (ID %d) lanÃ§ada em monstro pendente #%v (Shiny: %v)", chosenBall, item.SpeciesID, item.Shiny))
 					}
 				}
 			}
@@ -731,9 +746,9 @@ func (b *Bot) handleMessage(data []byte) {
 				b.updateStatus(func(st *engine.AccountStatus) {
 					st.Extra["captures"] = b.capturesCount
 				})
-				b.addLog(fmt.Sprintf("✨ Captura bem-sucedida com Pokébola ID %d! Total: %d", ev.BallID, b.capturesCount))
+				b.addLog(fmt.Sprintf("âœ¨ Captura bem-sucedida com PokÃ©bola ID %d! Total: %d", ev.BallID, b.capturesCount))
 			} else {
-				b.addLog(fmt.Sprintf("Pokébola ID %d falhou na captura.", ev.BallID))
+				b.addLog(fmt.Sprintf("PokÃ©bola ID %d falhou na captura.", ev.BallID))
 			}
 			b.mu.RLock()
 			s := b.socket
@@ -759,7 +774,7 @@ func (b *Bot) handleMessage(data []byte) {
 				}
 			})
 
-			// Auto compra de Pokébolas se estiver abaixo do mínimo
+			// Auto compra de PokÃ©bolas se estiver abaixo do mÃ­nimo
 			if b.config.Settings.AutoBuyBalls && count < b.config.Settings.MinBalls {
 				b.mu.Lock()
 				shouldBuy := time.Since(b.lastBuyBallAt) > 30*time.Second
@@ -840,12 +855,12 @@ func (b *Bot) handleMessage(data []byte) {
 					st.Extra["pokemonTypes"] = typeStr
 				})
 
-				// Avalia fraquezas com base no Pokémon da equipe
+				// Avalia fraquezas com base no PokÃ©mon da equipe
 				b.evaluateAndSwitchWeaknessHunt(targetSlug == "auto" || targetSlug == "")
 			}
 
 			if !hasTeam && len(ev.List) > 0 && s != nil {
-				// Invoca o primeiro Pokémon disponível para a equipe
+				// Invoca o primeiro PokÃ©mon disponÃ­vel para a equipe
 				p := ev.List[0]
 				types := b.catalog.GetPokemonTypes(p.SpeciesID, p.Name)
 				b.mu.Lock()
@@ -855,7 +870,7 @@ func (b *Bot) handleMessage(data []byte) {
 				b.mu.Unlock()
 
 				_ = s.SendJSON(SummonPacket{Type: "poke-summon", PokeID: p.ID})
-				b.addLog(fmt.Sprintf("Invocando Pokémon %s (Lv. %d) para a equipe...", p.Name, p.Level))
+				b.addLog(fmt.Sprintf("Invocando PokÃ©mon %s (Lv. %d) para a equipe...", p.Name, p.Level))
 				time.Sleep(500 * time.Millisecond)
 				_ = s.SendJSON(JoyHealPacket{Type: "joy-heal"})
 				time.Sleep(500 * time.Millisecond)
@@ -863,7 +878,7 @@ func (b *Bot) handleMessage(data []byte) {
 				b.evaluateAndSwitchWeaknessHunt(true)
 			} else if teamNeedsHeal && s != nil && b.config.Settings.AutoHeal {
 				_ = s.SendJSON(JoyHealPacket{Type: "joy-heal"})
-				b.addLog("Pokémon da equipe sem vida. Curado com Nurse Joy!")
+				b.addLog("PokÃ©mon da equipe sem vida. Curado com Nurse Joy!")
 			}
 
 			if b.config.Settings.AutoSell {
@@ -909,7 +924,7 @@ func (b *Bot) handleMessage(data []byte) {
 							Action: "donate",
 							Amount: donateAmt,
 						})
-						b.addLog(fmt.Sprintf("💰 [Guilda] Doado %d de ouro para a guilda %s [%s]!", donateAmt, g.Name, g.Tag))
+						b.addLog(fmt.Sprintf("ðŸ’° [Guilda] Doado %d de ouro para a guilda %s [%s]!", donateAmt, g.Name, g.Tag))
 					}
 				}
 			} else {
@@ -928,20 +943,20 @@ func (b *Bot) handleMessage(data []byte) {
 					st.Extra["nextRecruit"] = nextStr
 				})
 
-				// Se recebemos convites e autoAccept está ativo
+				// Se recebemos convites e autoAccept estÃ¡ ativo
 				if len(ev.Invites) > 0 && autoAccept && s != nil {
 					bestInvite := ev.Invites[0]
-					b.addLog(fmt.Sprintf("📩 [Guilda] Recebido convite da guilda %s [%s] (convidado por: %s)!",
+					b.addLog(fmt.Sprintf("ðŸ“© [Guilda] Recebido convite da guilda %s [%s] (convidado por: %s)!",
 						bestInvite.GuildName, bestInvite.GuildTag, bestInvite.InvitedBy))
 
-					// Envia aceitação imediata com o pacote oficial comprovado
+					// Envia aceitaÃ§Ã£o imediata com o pacote oficial comprovado
 					_ = s.SendJSON(GuildActionPacket{
 						Type:     "guild-action",
 						Action:   "respond",
 						InviteID: bestInvite.ID,
 						Accept:   true,
 					})
-					b.addLog(fmt.Sprintf("🎉 [Guilda] Convite aceito! Entramos na guilda %s [%s]!",
+					b.addLog(fmt.Sprintf("ðŸŽ‰ [Guilda] Convite aceito! Entramos na guilda %s [%s]!",
 						bestInvite.GuildName, bestInvite.GuildTag))
 
 					time.Sleep(1 * time.Second)
@@ -958,9 +973,9 @@ func (b *Bot) handleMessage(data []byte) {
 				tName = strings.ToLower(b.Name())
 			}
 			bodyLower := strings.ToLower(ev.Msg.Body)
-			// Se alguém nos mencionou ou convidou no chat
+			// Se alguÃ©m nos mencionou ou convidou no chat
 			if tName != "" && strings.Contains(bodyLower, tName) {
-				b.addLog(fmt.Sprintf("💬 [Chat %s] %s: %s", ev.Msg.Channel, ev.Msg.FromName, ev.Msg.Body))
+				b.addLog(fmt.Sprintf("ðŸ’¬ [Chat %s] %s: %s", ev.Msg.Channel, ev.Msg.FromName, ev.Msg.Body))
 				// Imediatamente atualiza guild-get para pegar o convite
 				b.mu.RLock()
 				s := b.socket
@@ -968,6 +983,57 @@ func (b *Bot) handleMessage(data []byte) {
 				if s != nil {
 					_ = s.SendJSON(GuildGetPacket{Type: "guild-get", WithList: true})
 				}
+			}
+		}
+
+		case "amigos":
+		var ev struct {
+			Lista []struct {
+				ID        any    `json:"id"`
+				Nick      string `json:"nick"`
+				CoinsSent bool   `json:"coinsEnviadasHoje"`
+			} `json:"lista"`
+		}
+		if err := json.Unmarshal(data, &ev); err == nil && b.config.Settings.AutoFriendCoins {
+			b.mu.RLock()
+			s := b.socket
+			b.mu.RUnlock()
+			if s != nil && s.IsConnected() {
+				for _, a := range ev.Lista {
+					if !a.CoinsSent {
+						_ = s.SendJSON(FriendCoinsPacket{Type: "amigo.coins", AmigoID: a.ID, Valor: 1})
+						time.Sleep(200 * time.Millisecond)
+					}
+				}
+			}
+		}
+
+	case "evolucao":
+		var ev struct {
+			Nome string `json:"nome"`
+			De   string `json:"de"`
+		}
+		if err := json.Unmarshal(data, &ev); err == nil && ev.Nome != "" {
+			b.addLog(fmt.Sprintf("🎉 [Evolução Concluída] %s evoluiu com sucesso para %s!", ev.De, ev.Nome))
+			b.mu.RLock()
+			s := b.socket
+			b.mu.RUnlock()
+			if s != nil {
+				_ = s.SendJSON(map[string]any{"type": "pokes-get"})
+			}
+		}
+
+	case "passe":
+		b.addLog("📜 [Passe de Batalha] Recompensa diária coletada com sucesso!")
+
+	case "ginasio":
+		var ev struct {
+			Venceu bool   `json:"venceu"`
+			Tipo   string `json:"tipo"`
+		}
+		if err := json.Unmarshal(data, &ev); err == nil && ev.Tipo != "" {
+			if ev.Venceu {
+				b.addLog(fmt.Sprintf("👑 [Ginásio %s] Vitória! Buff permanente de +10%% de dano ativo!", ev.Tipo))
 			}
 		}
 
@@ -984,7 +1050,7 @@ func (b *Bot) handleMessage(data []byte) {
 	}
 }
 
-// evaluateAndSwitchWeaknessHunt analisa os tipos do Pokémon ativo e escolhe a rota onde o inimigo tem maior fraqueza
+// evaluateAndSwitchWeaknessHunt analisa os tipos do PokÃ©mon ativo e escolhe a rota onde o inimigo tem maior fraqueza
 func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	b.mu.Lock()
 	activeTypes := b.activeTypes
@@ -1005,7 +1071,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	}
 
 	if !autoWeakness && currentSlug != "" && currentSlug != "auto" {
-		// Modo manual: calcula eficácia do alvo atual para exibição
+		// Modo manual: calcula eficÃ¡cia do alvo atual para exibiÃ§Ã£o
 		targetTypes := b.catalog.GetHuntTypes(currentSlug)
 		huntLevel := 0
 		if h, ok := b.catalog.GetHunt(currentSlug); ok {
@@ -1044,7 +1110,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	copy(pokes, b.availablePokes)
 	b.mu.RUnlock()
 
-	// Gera fila completa do Bestiário com base no catálogo e nas fraquezas elementais
+	// Gera fila completa do BestiÃ¡rio com base no catÃ¡logo e nas fraquezas elementais
 	fullQueue := b.catalog.GetBestiaryQueue(activeTypes, playerLevel, dexEntries)
 	totalAccessible := len(fullQueue)
 	totalCompleted := 0
@@ -1060,7 +1126,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	var activeTarget *BestiaryQueueItem
 
 	if pokedexMode && len(fullQueue) > 0 {
-		// 1. Verifica o primeiro alvo pendente do Pokémon ativo atual
+		// 1. Verifica o primeiro alvo pendente do PokÃ©mon ativo atual
 		for _, it := range fullQueue {
 			if it.Score > 0 && !skips[it.SpeciesID] {
 				cpy := it
@@ -1069,8 +1135,8 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 			}
 		}
 
-		// 2. Se o Pokémon atual NÃO possui alvo 4.0x (ou se o alvo atual for < 4.0x),
-		// verifica se OUTRO Pokémon na mochila possui alvo 4.0x no Bestiário para troca!
+		// 2. Se o PokÃ©mon atual NÃƒO possui alvo 4.0x (ou se o alvo atual for < 4.0x),
+		// verifica se OUTRO PokÃ©mon na mochila possui alvo 4.0x no BestiÃ¡rio para troca!
 		if (activeTarget == nil || activeTarget.Offensive < 4.0) && len(pokes) > 1 {
 			for _, p := range pokes {
 				if p.Name == activeName {
@@ -1083,7 +1149,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 				pQueue := b.catalog.GetBestiaryQueue(pTypes, playerLevel, dexEntries)
 				for _, it := range pQueue {
 					if it.Offensive >= 4.0 && it.Score > 0 && !skips[it.SpeciesID] {
-						// Encontrou alvo 4.0x para outro Pokémon da equipe!
+						// Encontrou alvo 4.0x para outro PokÃ©mon da equipe!
 						b.mu.RLock()
 						s := b.socket
 						b.mu.RUnlock()
@@ -1091,7 +1157,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 							_ = s.SendJSON(SummonPacket{Type: "poke-summon", PokeID: p.ID})
 							time.Sleep(300 * time.Millisecond)
 							_ = s.SendJSON(JoyHealPacket{Type: "joy-heal"})
-							b.addLog(fmt.Sprintf("🔄 [Troca Estratégica 4.0x] Invocando %s (Lv. %d) [%s] para explorar fraqueza 4.0x contra %s (Lv. %d)!",
+							b.addLog(fmt.Sprintf("ðŸ”„ [Troca EstratÃ©gica 4.0x] Invocando %s (Lv. %d) [%s] para explorar fraqueza 4.0x contra %s (Lv. %d)!",
 								p.Name, p.Level, strings.Join(pTypes, "/"), it.Name, it.Level))
 						}
 
@@ -1145,7 +1211,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 		}
 	}
 
-	// Fallback para caçada de maior XP se não estiver em modo Bestiário ou todos já foram concluídos
+	// Fallback para caÃ§ada de maior XP se nÃ£o estiver em modo BestiÃ¡rio ou todos jÃ¡ foram concluÃ­dos
 	if !found {
 		bestHunt, offMult, risk, found = b.catalog.FindBestHunt(activeTypes, playerLevel, dexEntries, false)
 		if !found {
@@ -1162,7 +1228,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 		killsText = fmt.Sprintf("%d/100", entry.Kills)
 	}
 
-	// Fila dos próximos alvos do Bestiário para o painel web
+	// Fila dos prÃ³ximos alvos do BestiÃ¡rio para o painel web
 	var topQueue []BestiaryQueueItem
 	for _, it := range fullQueue {
 		if it.Score > 0 {
@@ -1173,7 +1239,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 		}
 	}
 
-	// Lista completa para o explorador de catálogo da Pokédex
+	// Lista completa para o explorador de catÃ¡logo da PokÃ©dex
 	var accessibleCatalog []map[string]any
 	for _, it := range fullQueue {
 		accessibleCatalog = append(accessibleCatalog, map[string]any{
@@ -1237,7 +1303,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	})
 
 	if slugChanged || forceEnter {
-		b.addLog(fmt.Sprintf("🎯 [Rota / Bestiário] %s [%s] -> %s (Lv. %d) [%s] | Dano: %.1fx | %s | Bestiário: %s",
+		b.addLog(fmt.Sprintf("ðŸŽ¯ [Rota / BestiÃ¡rio] %s [%s] -> %s (Lv. %d) [%s] | Dano: %.1fx | %s | BestiÃ¡rio: %s",
 			activeName, strings.Join(activeTypes, "/"), bestHunt.Name, bestHunt.Level,
 			strings.Join(targetTypes, "/"), offMult, desc, killsText))
 		if s != nil && autoHunt {
@@ -1246,7 +1312,7 @@ func (b *Bot) evaluateAndSwitchWeaknessHunt(forceEnter bool) {
 	}
 }
 
-// sendEnterHunt envia o pacote de entrada na área de caça atual
+// sendEnterHunt envia o pacote de entrada na Ã¡rea de caÃ§a atual
 func (b *Bot) sendEnterHunt(resume bool) {
 	b.mu.RLock()
 	s := b.socket
@@ -1273,7 +1339,7 @@ func (b *Bot) sendEnterHunt(resume bool) {
 	}
 }
 
-// buyBalls realiza a compra de Pokébolas na API do jogo
+// buyBalls realiza a compra de PokÃ©bolas na API do jogo
 func (b *Bot) buyBalls(ballID, qty int) {
 	if b.token == "" {
 		return
@@ -1282,10 +1348,10 @@ func (b *Bot) buyBalls(ballID, qty int) {
 	var res map[string]any
 	err := b.httpCli.PostJSON("/api/game/balls/buy", req, &res)
 	if err != nil {
-		b.addLog(fmt.Sprintf("Erro ao comprar Pokébolas: %v", err))
+		b.addLog(fmt.Sprintf("Erro ao comprar PokÃ©bolas: %v", err))
 		return
 	}
-	b.addLog(fmt.Sprintf("🛒 Compradas %d Pokébolas (ID %d) com sucesso!", qty, ballID))
+	b.addLog(fmt.Sprintf("ðŸ›’ Compradas %d PokÃ©bolas (ID %d) com sucesso!", qty, ballID))
 
 	b.mu.RLock()
 	s := b.socket
@@ -1295,13 +1361,13 @@ func (b *Bot) buyBalls(ballID, qty int) {
 	}
 }
 
-// checkAutoSell vende pokémons comuns duplicados, preservando 1 exemplar de cada espécie para rotação de fraquezas 4.0x
+// checkAutoSell vende pokÃ©mons comuns duplicados, preservando 1 exemplar de cada espÃ©cie para rotaÃ§Ã£o de fraquezas 4.0x
 func (b *Bot) checkAutoSell(pokes []PokemonItem) {
 	if b.token == "" || len(pokes) == 0 {
 		return
 	}
 
-	// Identifica espécies já protegidas ou existentes na equipe
+	// Identifica espÃ©cies jÃ¡ protegidas ou existentes na equipe
 	seenSpecies := make(map[int]bool)
 	for _, p := range pokes {
 		if p.Team || p.Starter || p.Shiny || p.Locked || p.Listed {
@@ -1311,20 +1377,20 @@ func (b *Bot) checkAutoSell(pokes []PokemonItem) {
 
 	var toSell []any
 	for _, p := range pokes {
-		// Nunca vende pokémons da equipe, iniciais, shinies ou trancados
+		// Nunca vende pokÃ©mons da equipe, iniciais, shinies ou trancados
 		if p.Team || p.Starter || p.Shiny || p.Locked || p.Listed {
 			continue
 		}
 
 		if seenSpecies[p.SpeciesID] {
-			// Já possuímos um exemplar dessa espécie! Este é duplicado/repetido, pode vender.
+			// JÃ¡ possuÃ­mos um exemplar dessa espÃ©cie! Este Ã© duplicado/repetido, pode vender.
 			if p.SellValue > 0 {
 				toSell = append(toSell, p.ID)
 			}
 		} else {
-			// Primeiro exemplar desta espécie: preserva na mochila para rotações 4.0x!
+			// Primeiro exemplar desta espÃ©cie: preserva na mochila para rotaÃ§Ãµes 4.0x!
 			seenSpecies[p.SpeciesID] = true
-			b.addLog(fmt.Sprintf("🛡️ [Equipe 4.0x] Novo elemento preservado para rotação: %s (Lv. %d)", p.Name, p.Level))
+			b.addLog(fmt.Sprintf("ðŸ›¡ï¸ [Equipe 4.0x] Novo elemento preservado para rotaÃ§Ã£o: %s (Lv. %d)", p.Name, p.Level))
 		}
 	}
 
@@ -1336,7 +1402,7 @@ func (b *Bot) checkAutoSell(pokes []PokemonItem) {
 	var res map[string]any
 	err := b.httpCli.PostJSON("/api/game/pokemon/sell", req, &res)
 	if err == nil {
-		b.addLog(fmt.Sprintf("💰 Vendidos %d Pokémons duplicados/repetidos.", len(toSell)))
+		b.addLog(fmt.Sprintf("ðŸ’° Vendidos %d PokÃ©mons duplicados/repetidos.", len(toSell)))
 		b.mu.RLock()
 		s := b.socket
 		b.mu.RUnlock()
@@ -1346,20 +1412,103 @@ func (b *Bot) checkAutoSell(pokes []PokemonItem) {
 	}
 }
 
-// claimDailyRewards reivindica presente diário e recompensas de kill
+// checkAutoEvolve analisa todos os Pokémons disponíveis e evolui os que atingiram os requisitos
+func (b *Bot) checkAutoEvolve(pokes []PokemonItem) {
+	b.mu.RLock()
+	s := b.socket
+	b.mu.RUnlock()
+	if s == nil || !s.IsConnected() {
+		return
+	}
+
+	for _, p := range pokes {
+		targetID, canEvolve := b.catalog.GetEvolution(p.SpeciesID, p.Level)
+		if canEvolve && targetID > 0 {
+			targetName := b.catalog.GetSpeciesName(targetID)
+			b.addLog(fmt.Sprintf("🧬 [Evolução] %s (Lv. %d) atingiu os requisitos! Evoluindo para %s (ID %d)...",
+				p.Name, p.Level, targetName, targetID))
+			_ = s.SendJSON(PokemonEvolvePacket{
+				Type:      "pokemon.evoluir",
+				PokemonID: p.ID,
+				AlvoID:    targetID,
+			})
+			time.Sleep(1 * time.Second)
+		}
+	}
+}
+
+// runPeriodicFeatures executa automações periódicas de sistemas do jogo (Passe, Ginásio, Oferenda, Chocadeira, Amigos, etc.)
+func (b *Bot) runPeriodicFeatures() {
+	b.mu.RLock()
+	s := b.socket
+	cfg := b.config.Settings
+	activeTypes := b.activeTypes
+	activePoke := b.activePokemon
+	b.mu.RUnlock()
+
+	if s == nil || !s.IsConnected() {
+		return
+	}
+
+	// 1. Passe de Batalha Diário
+	if cfg.AutoBattlePass {
+		_ = s.SendJSON(BattlePassClaimPacket{Type: "passe.resgatar"})
+	}
+
+	// 2. Desafio dos Ginásios Elementais (busca buff de +10% de dano do elemento ativo)
+	if cfg.AutoGyms && len(activeTypes) > 0 {
+		gymType := activeTypes[0]
+		_ = s.SendJSON(GymChallengePacket{Type: "ginasio.desafiar", Tipo: gymType})
+	}
+
+	// 3. Altar de Oferendas (converte duplicatas em pedras e essências)
+	if cfg.AutoOfferings {
+		_ = s.SendJSON(AltarOfferingsAllPacket{Type: "oferenda.tudo"})
+	}
+
+	// 4. Chocadeira e Forja de Ovos Shinies
+	if cfg.AutoHatchery {
+		_ = s.SendJSON(ShinyEggCraftPacket{Type: "ovoShiny.fabricar"})
+		_ = s.SendJSON(EggHatchPlacePacket{Type: "chocadeira.colocar", Slot: 0, Ovo: 1})
+	}
+
+	// 5. Moedas de Amigos (solicita lista para retribuir moedas)
+	if cfg.AutoFriendCoins {
+		_ = s.SendJSON(FriendsInfoPacket{Type: "amigos.info"})
+	}
+
+	// 6. Refino de Atributos do Titular (aprimora ataque)
+	if cfg.AutoRefine && activePoke != "" {
+		b.mu.RLock()
+		pokes := b.availablePokes
+		b.mu.RUnlock()
+		for _, p := range pokes {
+			if p.Name == activePoke {
+				_ = s.SendJSON(PokemonRefinePacket{
+					Type:      "pokemon.refinar",
+					PokemonID: p.ID,
+					Stat:      "atk",
+				})
+				break
+			}
+		}
+	}
+}
+
+// claimDailyRewards reivindica presente diÃ¡rio e recompensas de kill
 func (b *Bot) claimDailyRewards() {
 	if b.token == "" {
 		return
 	}
 	var dummy map[string]any
-	// 1. Presente do calendário diário
+	// 1. Presente do calendÃ¡rio diÃ¡rio
 	_ = b.httpCli.PostJSON("/api/game/daily", map[string]any{}, &dummy)
 
-	// 2. Recompensa de missão diária de abate
+	// 2. Recompensa de missÃ£o diÃ¡ria de abate
 	_ = b.httpCli.PostJSON("/api/game/daily-kill/claim", map[string]any{}, &dummy)
 }
 
-// refreshCharacterInfo consulta os dados atualizados do treinador (nível, XP, ouro) na API oficial
+// refreshCharacterInfo consulta os dados atualizados do treinador (nÃ­vel, XP, ouro) na API oficial
 func (b *Bot) refreshCharacterInfo() {
 	if b.token == "" {
 		return
@@ -1385,19 +1534,19 @@ func (b *Bot) refreshCharacterInfo() {
 		})
 
 		if oldLevel > 0 && ch.Level > oldLevel {
-			b.addLog(fmt.Sprintf("🎉 Treinador '%s' avançou para o Nível %d! Re-avaliando rotas de caça...", ch.Name, ch.Level))
+			b.addLog(fmt.Sprintf("ðŸŽ‰ Treinador '%s' avanÃ§ou para o NÃ­vel %d! Re-avaliando rotas de caÃ§a...", ch.Name, ch.Level))
 			b.evaluateAndSwitchWeaknessHunt(false)
 		}
 	}
 }
 
-// checkAndClaimPokedex consulta a Pokédex/Bestiário, resgata bônus de +25% XP pendentes e atualiza progresso
+// checkAndClaimPokedex consulta a PokÃ©dex/BestiÃ¡rio, resgata bÃ´nus de +25% XP pendentes e atualiza progresso
 func (b *Bot) checkAndClaimPokedex() bool {
 	if b.token == "" {
 		return false
 	}
 
-	// Mantém as informações do treinador (nível, gold, XP) sempre sincronizadas com a API
+	// MantÃ©m as informaÃ§Ãµes do treinador (nÃ­vel, gold, XP) sempre sincronizadas com a API
 	b.refreshCharacterInfo()
 
 	var res PokedexResponse
@@ -1433,7 +1582,7 @@ func (b *Bot) checkAndClaimPokedex() bool {
 			if spName == "" {
 				spName = fmt.Sprintf("#%d", spID)
 			}
-			b.addLog(fmt.Sprintf("📖 [Bestiário] 🎉 Bônus +25%% XP resgatado para %s (+%d XP)! Nível: Lv. %d",
+			b.addLog(fmt.Sprintf("ðŸ“– [BestiÃ¡rio] ðŸŽ‰ BÃ´nus +25%% XP resgatado para %s (+%d XP)! NÃ­vel: Lv. %d",
 				spName, claimRes.XPGained, claimRes.Level))
 
 			b.updateStatus(func(st *engine.AccountStatus) {
@@ -1468,7 +1617,7 @@ func (b *Bot) checkAndClaimPokedex() bool {
 		}
 	})
 
-	// Se resgatou bônus ou se o modo Bestiário estiver ativo, re-avalia rota e atualiza status
+	// Se resgatou bÃ´nus ou se o modo BestiÃ¡rio estiver ativo, re-avalia rota e atualiza status
 	if b.config.Settings.PokedexFarmMode {
 		b.evaluateAndSwitchWeaknessHunt(claimedAny)
 	}
@@ -1583,7 +1732,7 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			b.appendLogLocked("Cura solicitada via Nurse Joy.")
 			return "Cura disparada com sucesso!", nil
 		}
-		return nil, fmt.Errorf("socket não conectado")
+		return nil, fmt.Errorf("socket nÃ£o conectado")
 
 	case "toggleWeakness":
 		b.config.Settings.AutoWeakness = !b.config.Settings.AutoWeakness
@@ -1600,7 +1749,7 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			area, _ = payload["slug"].(string)
 		}
 		if area == "" {
-			return nil, fmt.Errorf("parâmetro 'area' ou 'slug' obrigatório")
+			return nil, fmt.Errorf("parÃ¢metro 'area' ou 'slug' obrigatÃ³rio")
 		}
 		area = strings.ToLower(strings.TrimSpace(area))
 		if area == "auto" || area == "fraqueza" || area == "weakness" {
@@ -1608,9 +1757,9 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			b.config.Settings.HuntTarget = "auto"
 			b.targetSlug = "auto"
 			b.status.Extra["autoWeakness"] = true
-			b.appendLogLocked("Modo de Caça Inteligente por Fraqueza ativado.")
+			b.appendLogLocked("Modo de CaÃ§a Inteligente por Fraqueza ativado.")
 			go b.evaluateAndSwitchWeaknessHunt(true)
-			return "Modo Fraqueza Automática ativado!", nil
+			return "Modo Fraqueza AutomÃ¡tica ativado!", nil
 		}
 		b.config.Settings.AutoWeakness = false
 		b.targetSlug = area
@@ -1618,12 +1767,12 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 		b.status.CurrentArea = b.catalog.GetHuntName(area)
 		b.status.Extra["slug"] = area
 		b.status.Extra["autoWeakness"] = false
-		b.appendLogLocked(fmt.Sprintf("Área alterada para: %s (%s)", b.status.CurrentArea, area))
+		b.appendLogLocked(fmt.Sprintf("Ãrea alterada para: %s (%s)", b.status.CurrentArea, area))
 		go func() {
 			b.evaluateAndSwitchWeaknessHunt(false)
 			b.sendEnterHunt(false)
 		}()
-		return fmt.Sprintf("Área alterada para %s", area), nil
+		return fmt.Sprintf("Ãrea alterada para %s", area), nil
 
 	case "buyBalls":
 		qty := 50
@@ -1635,12 +1784,12 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			ballID = int(bID)
 		}
 		go b.buyBalls(ballID, qty)
-		return fmt.Sprintf("Comprando %d Pokébolas (ID %d)...", qty, ballID), nil
+		return fmt.Sprintf("Comprando %d PokÃ©bolas (ID %d)...", qty, ballID), nil
 
 	case "claimDaily":
 		go b.claimDailyRewards()
-		b.appendLogLocked("Reivindicação diária disparada.")
-		return "Recompensas diárias solicitadas!", nil
+		b.appendLogLocked("ReivindicaÃ§Ã£o diÃ¡ria disparada.")
+		return "Recompensas diÃ¡rias solicitadas!", nil
 
 	case "refresh":
 		if s != nil && s.IsConnected() {
@@ -1649,9 +1798,9 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			_ = s.SendJSON(map[string]any{"type": "inv-get"})
 			_ = s.SendJSON(map[string]any{"type": "analyzer-get"})
 			_ = s.SendJSON(GuildGetPacket{Type: "guild-get", WithList: true})
-			return "Sincronização solicitada!", nil
+			return "SincronizaÃ§Ã£o solicitada!", nil
 		}
-		return nil, fmt.Errorf("socket não conectado")
+		return nil, fmt.Errorf("socket nÃ£o conectado")
 
 	case "sendChat":
 		msg, _ := payload["message"].(string)
@@ -1659,7 +1808,7 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			msg, _ = payload["body"].(string)
 		}
 		if msg == "" {
-			return nil, fmt.Errorf("mensagem não informada")
+			return nil, fmt.Errorf("mensagem nÃ£o informada")
 		}
 		ch, _ := payload["channel"].(string)
 		if ch == "" {
@@ -1667,10 +1816,10 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 		}
 		if s != nil && s.IsConnected() {
 			_ = s.SendJSON(SendChatPacket{Type: "send", Channel: ch, Body: msg})
-			b.appendLogLocked(fmt.Sprintf("💬 Mensagem enviada no chat [%s]: %s", ch, msg))
+			b.appendLogLocked(fmt.Sprintf("ðŸ’¬ Mensagem enviada no chat [%s]: %s", ch, msg))
 			return "Mensagem enviada no chat!", nil
 		}
-		return nil, fmt.Errorf("socket não conectado")
+		return nil, fmt.Errorf("socket nÃ£o conectado")
 
 	case "guildRecruit":
 		tName := b.status.Name
@@ -1686,18 +1835,18 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			nextDelay := getRandomRecruitDelay()
 			b.lastRecruitPingAt = time.Now()
 			b.nextRecruitPingAt = time.Now().Add(nextDelay)
-			b.appendLogLocked(fmt.Sprintf("📢 Divulgação de guilda enviada: \"%s\" (próximo sorteado em %s)", msg, formatDurationHuman(nextDelay)))
-			return fmt.Sprintf("Divulgação enviada no chat! Próximo envio sorteado para daqui a %s.", formatDurationHuman(nextDelay)), nil
+			b.appendLogLocked(fmt.Sprintf("ðŸ“¢ DivulgaÃ§Ã£o de guilda enviada: \"%s\" (prÃ³ximo sorteado em %s)", msg, formatDurationHuman(nextDelay)))
+			return fmt.Sprintf("DivulgaÃ§Ã£o enviada no chat! PrÃ³ximo envio sorteado para daqui a %s.", formatDurationHuman(nextDelay)), nil
 		}
-		return nil, fmt.Errorf("socket não conectado")
+		return nil, fmt.Errorf("socket nÃ£o conectado")
 
 	case "guildGet":
 		if s != nil && s.IsConnected() {
 			_ = s.SendJSON(GuildGetPacket{Type: "guild-get", WithList: true})
-			b.appendLogLocked("Informações de guilda solicitadas.")
+			b.appendLogLocked("InformaÃ§Ãµes de guilda solicitadas.")
 			return "Status da guilda atualizado!", nil
 		}
-		return nil, fmt.Errorf("socket não conectado")
+		return nil, fmt.Errorf("socket nÃ£o conectado")
 
 	case "guildDonate":
 		amt := 5000
@@ -1706,18 +1855,18 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 		}
 		if s != nil && s.IsConnected() {
 			_ = s.SendJSON(GuildActionPacket{Type: "guild-action", Action: "donate", Amount: amt})
-			b.appendLogLocked(fmt.Sprintf("Doação de %d ouro enviada para a guilda.", amt))
+			b.appendLogLocked(fmt.Sprintf("DoaÃ§Ã£o de %d ouro enviada para a guilda.", amt))
 			return fmt.Sprintf("Doado %d de ouro para a guilda!", amt), nil
 		}
-		return nil, fmt.Errorf("socket não conectado")
+		return nil, fmt.Errorf("socket nÃ£o conectado")
 
 	case "guildLeave":
 		if s != nil && s.IsConnected() {
 			_ = s.SendJSON(GuildActionPacket{Type: "guild-action", Action: "leave"})
-			b.appendLogLocked("Solicitação para sair da guilda enviada.")
-			return "Solicitação para sair da guilda enviada!", nil
+			b.appendLogLocked("SolicitaÃ§Ã£o para sair da guilda enviada.")
+			return "SolicitaÃ§Ã£o para sair da guilda enviada!", nil
 		}
-		return nil, fmt.Errorf("socket não conectado")
+		return nil, fmt.Errorf("socket nÃ£o conectado")
 
 	case "supplyTicket":
 		ticket, _ := payload["ticket"].(string)
@@ -1725,7 +1874,7 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			ticket, _ = payload["token"].(string)
 		}
 		if ticket == "" {
-			return nil, fmt.Errorf("campo ticket/token obrigatório")
+			return nil, fmt.Errorf("campo ticket/token obrigatÃ³rio")
 		}
 		b.mu.Unlock()
 		err := b.SupplyTicket(ticket, "")
@@ -1734,7 +1883,7 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 
 	case "claimPokedex", "pokedexClaim":
 		go b.checkAndClaimPokedex()
-		return "Verificação e resgate da Pokédex disparados!", nil
+		return "VerificaÃ§Ã£o e resgate da PokÃ©dex disparados!", nil
 
 	case "togglePokedex":
 		b.config.Settings.PokedexFarmMode = !b.config.Settings.PokedexFarmMode
@@ -1744,8 +1893,8 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			modeStr = "ON"
 			go b.evaluateAndSwitchWeaknessHunt(true)
 		}
-		b.appendLogLocked(fmt.Sprintf("Modo Foco em Bestiário alterado para: %s", modeStr))
-		return fmt.Sprintf("Modo Bestiário alterado para %s!", modeStr), nil
+		b.appendLogLocked(fmt.Sprintf("Modo Foco em BestiÃ¡rio alterado para: %s", modeStr))
+		return fmt.Sprintf("Modo BestiÃ¡rio alterado para %s!", modeStr), nil
 
 	case "skipBestiaryTarget", "bestiaryNext":
 		currentSpID := b.catalog.GetSpeciesIDByName(b.targetSlug)
@@ -1759,20 +1908,20 @@ func (b *Bot) ExecuteAction(action string, payload map[string]any) (any, error) 
 			if name == "" {
 				name = b.targetSlug
 			}
-			b.appendLogLocked(fmt.Sprintf("⏩ [Bestiário] Alvo %s pulado manualmente. Rotacionando para o próximo monstro...", name))
+			b.appendLogLocked(fmt.Sprintf("â© [BestiÃ¡rio] Alvo %s pulado manualmente. Rotacionando para o prÃ³ximo monstro...", name))
 			go b.evaluateAndSwitchWeaknessHunt(true)
-			return fmt.Sprintf("Alvo %s pulado! Indo para o próximo...", name), nil
+			return fmt.Sprintf("Alvo %s pulado! Indo para o prÃ³ximo...", name), nil
 		}
 		return nil, fmt.Errorf("nenhum alvo ativo para pular")
 
 	case "resetBestiarySkips":
 		b.bestiarySkips = make(map[int]bool)
-		b.appendLogLocked("🔄 [Bestiário] Pulos manuais resetados. Fila normal restabelecida.")
+		b.appendLogLocked("ðŸ”„ [BestiÃ¡rio] Pulos manuais resetados. Fila normal restabelecida.")
 		go b.evaluateAndSwitchWeaknessHunt(true)
-		return "Fila do Bestiário reiniciada com sucesso!", nil
+		return "Fila do BestiÃ¡rio reiniciada com sucesso!", nil
 
 	default:
-		return nil, fmt.Errorf("ação desconhecida: %s", action)
+		return nil, fmt.Errorf("aÃ§Ã£o desconhecida: %s", action)
 	}
 }
 
