@@ -877,8 +877,7 @@ func (b *Bot) handleMessage(data []byte) {
 
 				b.evaluateAndSwitchWeaknessHunt(true)
 			} else if teamNeedsHeal && s != nil && b.config.Settings.AutoHeal {
-				_ = s.SendJSON(JoyHealPacket{Type: "joy-heal"})
-				b.addLog("PokÃ©mon da equipe sem vida. Curado com Nurse Joy!")
+				go b.triggerHealSequence()
 			}
 
 			if b.config.Settings.AutoSell {
@@ -1050,6 +1049,16 @@ func (b *Bot) handleMessage(data []byte) {
 	case "bossSaiu":
 		b.addLog("👹 [Boss] Batalha de Boss finalizada.")
 
+	case "curado":
+		b.addLog("💉 [Nurse Joy] Equipe completamente curada (100% HP)!")
+		b.mu.Lock()
+		activeSlug := b.targetSlug
+		isH := b.isHunting
+		b.mu.Unlock()
+		if b.config.Settings.AutoHunt && !b.paused && !isH && activeSlug != "" && activeSlug != "auto" {
+			b.sendEnterHunt(true)
+		}
+
 	case "error":
 		var ev struct {
 			Message string `json:"message"`
@@ -1057,6 +1066,9 @@ func (b *Bot) handleMessage(data []byte) {
 		_ = json.Unmarshal(data, &ev)
 		if ev.Message != "" {
 			b.addLog("Aviso do jogo: " + ev.Message)
+		if strings.Contains(ev.Message, "desmaiada") || strings.Contains(ev.Message, "Enfermeira Joy") {
+			go b.triggerHealSequence()
+		}
 		} else {
 			b.addLog("Mensagem do jogo: " + string(data))
 		}
@@ -2004,3 +2016,27 @@ func min(a, b int) int {
 	}
 	return b
 }
+
+// triggerHealSequence executa a sequência canônica para voltar à cidade (leave-hunt), curar na Nurse Joy (joy-heal) e re-entrar na hunt
+func (b *Bot) triggerHealSequence() {
+	b.mu.RLock()
+	s := b.socket
+	slug := b.targetSlug
+	b.mu.RUnlock()
+	if s == nil || !s.IsConnected() {
+		return
+	}
+
+	b.addLog("🏥 [Nurse Joy] Retornando à cidade (leave-hunt) para curar com Nurse Joy (joy-heal)...")
+	_ = s.SendJSON(LeaveHuntPacket{Type: "leave-hunt"})
+	time.Sleep(600 * time.Millisecond)
+	_ = s.SendJSON(JoyHealPacket{Type: "joy-heal"})
+	time.Sleep(600 * time.Millisecond)
+	_ = s.SendJSON(map[string]any{"type": "pokes-get"})
+	time.Sleep(400 * time.Millisecond)
+
+	if b.config.Settings.AutoHunt && !b.paused && slug != "" && slug != "auto" {
+		b.sendEnterHunt(true)
+	}
+}
+
