@@ -2,12 +2,12 @@
   "accounts": [
     {
       "currentArea": "Cloyster",
-      "durationSec": 260,
-      "expPerHour": 60036.92307692308,
+      "durationSec": 384,
+      "expPerHour": 60975,
       "extra": {
         "activePokemon": "Bulbasaur",
         "autoWeakness": true,
-        "balls": 33,
+        "balls": 32,
         "captures": 0,
         "enemyTypes": "WATER / ICE",
         "guild": "Sem Guilda (Aguardando convite)",
@@ -16,23 +16,38 @@
         "guildTag": "",
         "huntLevel": 60,
         "lookType": 20011,
-        "lootGold": 103,
-        "lootItems": 39,
+        "lootGold": 158,
+        "lootItems": 62,
         "matchup": "2.0x Dano",
         "matchupDetail": "2.0x (Super Efetivo) | Alto Risco | XP Máxima (Lv. 60)",
-        "nextRecruit": "4h 00m",
+        "nextRecruit": "3h 58m",
         "pokeCount": 8,
         "pokedexCatalog": [
           {
             "canClaim": false,
             "claimed": false,
-            "kills": 2,
+            "kills": 3,
             "level": 60,
             "name": "Cloyster",
             "offensive": 2,
-            "remaining": 98,
+            "remaining": 97,
             "slug": "cloyster",
             "speciesId": 91,
+            "types": [
+              "WATER",
+              "ICE"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 60,
+            "name": "Dewgong",
+            "offensive": 2,
+            "remaining": 100,
+            "slug": "dewgong",
+            "speciesId": 87,
             "types": [
               "WATER",
               "ICE"
@@ -51,21 +66,6 @@
             "types": [
               "WATER",
               "PSYCHIC"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 60,
-            "name": "Dewgong",
-            "offensive": 2,
-            "remaining": 100,
-            "slug": "dewgong",
-            "speciesId": 87,
-            "types": [
-              "WATER",
-              "ICE"
             ]
           },
           {
@@ -215,13 +215,12 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Marill",
+            "name": "Cleffa",
             "offensive": 2,
             "remaining": 100,
-            "slug": "marill",
-            "speciesId": 183,
+            "slug": "cleffa",
+            "speciesId": 173,
             "types": [
-              "WATER",
               "FAIRY"
             ]
           },
@@ -230,11 +229,11 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Seel",
+            "name": "Staryu",
             "offensive": 2,
             "remaining": 100,
-            "slug": "seel",
-            "speciesId": 86,
+            "slug": "staryu",
+            "speciesId": 120,
             "types": [
               "WATER"
             ]
@@ -258,13 +257,13 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Cleffa",
+            "name": "Totodile",
             "offensive": 2,
             "remaining": 100,
-            "slug": "cleffa",
-            "speciesId": 173,
+            "slug": "totodile",
+            "speciesId": 158,
             "types": [
-              "FAIRY"
+              "WATER"
             ]
           },
           {
@@ -272,11 +271,11 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Totodile",
+            "name": "Seel",
             "offensive": 2,
             "remaining": 100,
-            "slug": "totodile",
-            "speciesId": 158,
+            "slug": "seel",
+            "speciesId": 86,
             "types": [
               "WATER"
             ]
@@ -300,13 +299,14 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Staryu",
+            "name": "Marill",
             "offensive": 2,
             "remaining": 100,
-            "slug": "staryu",
-            "speciesId": 120,
+            "slug": "marill",
+            "speciesId": 183,
             "types": [
-              "WATER"
+              "WATER",
+              "FAIRY"
             ]
           },
           {
@@ -371,6 +371,21 @@
             "claimed": false,
             "kills": 0,
             "level": 10,
+            "name": "Chinchou",
+            "offensive": 2,
+            "remaining": 100,
+            "slug": "chinchou",
+            "speciesId": 170,
+            "types": [
+              "WATER",
+              "ELECTRIC"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 10,
             "name": "Krabby",
             "offensive": 2,
             "remaining": 100,
@@ -420,21 +435,6 @@
             "speciesId": 116,
             "types": [
               "WATER"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 10,
-            "name": "Chinchou",
-            "offensive": 2,
-            "remaining": 100,
-            "slug": "chinchou",
-            "speciesId": 170,
-            "types": [
-              "WATER",
-              "ELECTRIC"
             ]
           },
           {
@@ -543,20 +543,6 @@
             "claimed": false,
             "kills": 0,
             "level": 60,
-            "name": "Pikachu",
-            "offensive": 1,
-            "remaining": 100,
-            "slug": "pikachu",
-            "speciesId": 25,
-            "types": [
-              "ELECTRIC"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 60,
             "name": "Hitmonlee",
             "offensive": 1,
             "remaining": 100,
@@ -571,13 +557,13 @@
             "claimed": false,
             "kills": 0,
             "level": 60,
-            "name": "Hitmonchan",
+            "name": "Pikachu",
             "offensive": 1,
             "remaining": 100,
-            "slug": "hitmonchan",
-            "speciesId": 107,
+            "slug": "pikachu",
+            "speciesId": 25,
             "types": [
-              "FIGHTING"
+              "ELECTRIC"
             ]
           },
           {
@@ -590,6 +576,20 @@
             "remaining": 100,
             "slug": "hitmontop",
             "speciesId": 237,
+            "types": [
+              "FIGHTING"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 60,
+            "name": "Hitmonchan",
+            "offensive": 1,
+            "remaining": 100,
+            "slug": "hitmonchan",
+            "speciesId": 107,
             "types": [
               "FIGHTING"
             ]
@@ -614,13 +614,14 @@
             "claimed": false,
             "kills": 0,
             "level": 60,
-            "name": "Lickitung",
+            "name": "Vileplume",
             "offensive": 1,
             "remaining": 100,
-            "slug": "lickitung",
-            "speciesId": 108,
+            "slug": "vileplume",
+            "speciesId": 45,
             "types": [
-              "NORMAL"
+              "GRASS",
+              "POISON"
             ]
           },
           {
@@ -628,11 +629,11 @@
             "claimed": false,
             "kills": 0,
             "level": 60,
-            "name": "Chansey",
+            "name": "Lickitung",
             "offensive": 1,
             "remaining": 100,
-            "slug": "chansey",
-            "speciesId": 113,
+            "slug": "lickitung",
+            "speciesId": 108,
             "types": [
               "NORMAL"
             ]
@@ -656,29 +657,13 @@
             "claimed": false,
             "kills": 0,
             "level": 60,
-            "name": "Vileplume",
+            "name": "Chansey",
             "offensive": 1,
             "remaining": 100,
-            "slug": "vileplume",
-            "speciesId": 45,
+            "slug": "chansey",
+            "speciesId": 113,
             "types": [
-              "GRASS",
-              "POISON"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 60,
-            "name": "Dodrio",
-            "offensive": 1,
-            "remaining": 100,
-            "slug": "dodrio",
-            "speciesId": 85,
-            "types": [
-              "NORMAL",
-              "FLYING"
+              "NORMAL"
             ]
           },
           {
@@ -714,12 +699,41 @@
             "canClaim": false,
             "claimed": false,
             "kills": 0,
+            "level": 60,
+            "name": "Dodrio",
+            "offensive": 1,
+            "remaining": 100,
+            "slug": "dodrio",
+            "speciesId": 85,
+            "types": [
+              "NORMAL",
+              "FLYING"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
             "level": 50,
             "name": "Persian",
             "offensive": 1,
             "remaining": 100,
             "slug": "persian",
             "speciesId": 53,
+            "types": [
+              "NORMAL"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 50,
+            "name": "Stantler",
+            "offensive": 1,
+            "remaining": 100,
+            "slug": "stantler",
+            "speciesId": 234,
             "types": [
               "NORMAL"
             ]
@@ -744,13 +758,14 @@
             "claimed": false,
             "kills": 0,
             "level": 50,
-            "name": "Stantler",
+            "name": "Fearow",
             "offensive": 1,
             "remaining": 100,
-            "slug": "stantler",
-            "speciesId": 234,
+            "slug": "fearow",
+            "speciesId": 22,
             "types": [
-              "NORMAL"
+              "NORMAL",
+              "FLYING"
             ]
           },
           {
@@ -772,27 +787,12 @@
             "canClaim": false,
             "claimed": false,
             "kills": 0,
-            "level": 50,
-            "name": "Fearow",
-            "offensive": 1,
-            "remaining": 100,
-            "slug": "fearow",
-            "speciesId": 22,
-            "types": [
-              "NORMAL",
-              "FLYING"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
             "level": 40,
-            "name": "Flaaffy",
+            "name": "Electrode",
             "offensive": 1,
             "remaining": 100,
-            "slug": "flaaffy",
-            "speciesId": 180,
+            "slug": "electrode",
+            "speciesId": 101,
             "types": [
               "ELECTRIC"
             ]
@@ -816,11 +816,11 @@
             "claimed": false,
             "kills": 0,
             "level": 40,
-            "name": "Electrode",
+            "name": "Flaaffy",
             "offensive": 1,
             "remaining": 100,
-            "slug": "electrode",
-            "speciesId": 101,
+            "slug": "flaaffy",
+            "speciesId": 180,
             "types": [
               "ELECTRIC"
             ]
@@ -859,21 +859,6 @@
             "claimed": false,
             "kills": 0,
             "level": 40,
-            "name": "Shuckle",
-            "offensive": 1,
-            "remaining": 100,
-            "slug": "shuckle",
-            "speciesId": 213,
-            "types": [
-              "BUG",
-              "ROCK"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 40,
             "name": "Ivysaur",
             "offensive": 1,
             "remaining": 100,
@@ -882,20 +867,6 @@
             "types": [
               "GRASS",
               "POISON"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 40,
-            "name": "Aipom",
-            "offensive": 1,
-            "remaining": 100,
-            "slug": "aipom",
-            "speciesId": 190,
-            "types": [
-              "NORMAL"
             ]
           },
           {
@@ -917,13 +888,28 @@
             "claimed": false,
             "kills": 0,
             "level": 40,
-            "name": "Charmeleon",
+            "name": "Aipom",
             "offensive": 1,
             "remaining": 100,
-            "slug": "charmeleon",
-            "speciesId": 5,
+            "slug": "aipom",
+            "speciesId": 190,
             "types": [
-              "FIRE"
+              "NORMAL"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 40,
+            "name": "Shuckle",
+            "offensive": 1,
+            "remaining": 100,
+            "slug": "shuckle",
+            "speciesId": 213,
+            "types": [
+              "BUG",
+              "ROCK"
             ]
           },
           {
@@ -936,6 +922,20 @@
             "remaining": 100,
             "slug": "quilava",
             "speciesId": 156,
+            "types": [
+              "FIRE"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 40,
+            "name": "Charmeleon",
+            "offensive": 1,
+            "remaining": 100,
+            "slug": "charmeleon",
+            "speciesId": 5,
             "types": [
               "FIRE"
             ]
@@ -1003,13 +1003,14 @@
             "claimed": false,
             "kills": 0,
             "level": 30,
-            "name": "Raticate",
+            "name": "Weepinbell",
             "offensive": 1,
             "remaining": 100,
-            "slug": "raticate",
-            "speciesId": 20,
+            "slug": "weepinbell",
+            "speciesId": 70,
             "types": [
-              "NORMAL"
+              "GRASS",
+              "POISON"
             ]
           },
           {
@@ -1046,14 +1047,13 @@
             "claimed": false,
             "kills": 0,
             "level": 30,
-            "name": "Weepinbell",
+            "name": "Teddiursa",
             "offensive": 1,
             "remaining": 100,
-            "slug": "weepinbell",
-            "speciesId": 70,
+            "slug": "teddiursa",
+            "speciesId": 216,
             "types": [
-              "GRASS",
-              "POISON"
+              "NORMAL"
             ]
           },
           {
@@ -1061,11 +1061,11 @@
             "claimed": false,
             "kills": 0,
             "level": 30,
-            "name": "Teddiursa",
+            "name": "Raticate",
             "offensive": 1,
             "remaining": 100,
-            "slug": "teddiursa",
-            "speciesId": 216,
+            "slug": "raticate",
+            "speciesId": 20,
             "types": [
               "NORMAL"
             ]
@@ -1089,11 +1089,11 @@
             "claimed": false,
             "kills": 0,
             "level": 30,
-            "name": "Magby",
+            "name": "Growlithe",
             "offensive": 1,
             "remaining": 100,
-            "slug": "magby",
-            "speciesId": 240,
+            "slug": "growlithe",
+            "speciesId": 58,
             "types": [
               "FIRE"
             ]
@@ -1103,25 +1103,11 @@
             "claimed": false,
             "kills": 0,
             "level": 30,
-            "name": "Drowzee",
+            "name": "Magby",
             "offensive": 1,
             "remaining": 100,
-            "slug": "drowzee",
-            "speciesId": 96,
-            "types": [
-              "PSYCHIC"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 30,
-            "name": "Growlithe",
-            "offensive": 1,
-            "remaining": 100,
-            "slug": "growlithe",
-            "speciesId": 58,
+            "slug": "magby",
+            "speciesId": 240,
             "types": [
               "FIRE"
             ]
@@ -1146,6 +1132,20 @@
             "claimed": false,
             "kills": 0,
             "level": 30,
+            "name": "Drowzee",
+            "offensive": 1,
+            "remaining": 100,
+            "slug": "drowzee",
+            "speciesId": 96,
+            "types": [
+              "PSYCHIC"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 30,
             "name": "Natu",
             "offensive": 1,
             "remaining": 100,
@@ -1161,11 +1161,11 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Pichu",
+            "name": "Mareep",
             "offensive": 1,
             "remaining": 100,
-            "slug": "pichu",
-            "speciesId": 172,
+            "slug": "mareep",
+            "speciesId": 179,
             "types": [
               "ELECTRIC"
             ]
@@ -1175,11 +1175,11 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Mareep",
+            "name": "Pichu",
             "offensive": 1,
             "remaining": 100,
-            "slug": "mareep",
-            "speciesId": 179,
+            "slug": "pichu",
+            "speciesId": 172,
             "types": [
               "ELECTRIC"
             ]
@@ -1232,6 +1232,20 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
+            "name": "Meowth",
+            "offensive": 1,
+            "remaining": 100,
+            "slug": "meowth",
+            "speciesId": 52,
+            "types": [
+              "NORMAL"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 20,
             "name": "Bulbasaur",
             "offensive": 1,
             "remaining": 100,
@@ -1240,20 +1254,6 @@
             "types": [
               "GRASS",
               "POISON"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 20,
-            "name": "Meowth",
-            "offensive": 1,
-            "remaining": 100,
-            "slug": "meowth",
-            "speciesId": 52,
-            "types": [
-              "NORMAL"
             ]
           },
           {
@@ -1276,11 +1276,26 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Ponyta",
+            "name": "Pidgeotto",
             "offensive": 1,
             "remaining": 100,
-            "slug": "ponyta",
-            "speciesId": 77,
+            "slug": "pidgeotto",
+            "speciesId": 17,
+            "types": [
+              "NORMAL",
+              "FLYING"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 20,
+            "name": "Cyndaquil",
+            "offensive": 1,
+            "remaining": 100,
+            "slug": "cyndaquil",
+            "speciesId": 155,
             "types": [
               "FIRE"
             ]
@@ -1319,14 +1334,13 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Pidgeotto",
+            "name": "Charmander",
             "offensive": 1,
             "remaining": 100,
-            "slug": "pidgeotto",
-            "speciesId": 17,
+            "slug": "charmander",
+            "speciesId": 4,
             "types": [
-              "NORMAL",
-              "FLYING"
+              "FIRE"
             ]
           },
           {
@@ -1334,11 +1348,11 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Cyndaquil",
+            "name": "Ponyta",
             "offensive": 1,
             "remaining": 100,
-            "slug": "cyndaquil",
-            "speciesId": 155,
+            "slug": "ponyta",
+            "speciesId": 77,
             "types": [
               "FIRE"
             ]
@@ -1362,14 +1376,14 @@
             "canClaim": false,
             "claimed": false,
             "kills": 0,
-            "level": 20,
-            "name": "Charmander",
+            "level": 10,
+            "name": "Mankey",
             "offensive": 1,
             "remaining": 100,
-            "slug": "charmander",
-            "speciesId": 4,
+            "slug": "mankey",
+            "speciesId": 56,
             "types": [
-              "FIRE"
+              "FIGHTING"
             ]
           },
           {
@@ -1384,20 +1398,6 @@
             "speciesId": 100,
             "types": [
               "ELECTRIC"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 10,
-            "name": "Mankey",
-            "offensive": 1,
-            "remaining": 100,
-            "slug": "mankey",
-            "speciesId": 56,
-            "types": [
-              "FIGHTING"
             ]
           },
           {
@@ -1419,13 +1419,12 @@
             "claimed": false,
             "kills": 0,
             "level": 30,
-            "name": "Beedrill",
+            "name": "Nidorina",
             "offensive": 0.5,
             "remaining": 100,
-            "slug": "beedrill",
-            "speciesId": 15,
+            "slug": "nidorina",
+            "speciesId": 30,
             "types": [
-              "BUG",
               "POISON"
             ]
           },
@@ -1434,12 +1433,13 @@
             "claimed": false,
             "kills": 0,
             "level": 30,
-            "name": "Nidorina",
+            "name": "Beedrill",
             "offensive": 0.5,
             "remaining": 100,
-            "slug": "nidorina",
-            "speciesId": 30,
+            "slug": "beedrill",
+            "speciesId": 15,
             "types": [
+              "BUG",
               "POISON"
             ]
           },
@@ -1505,13 +1505,14 @@
             "claimed": false,
             "kills": 0,
             "level": 10,
-            "name": "Abra",
+            "name": "Spearow",
             "offensive": 1,
             "remaining": 100,
-            "slug": "abra",
-            "speciesId": 63,
+            "slug": "spearow",
+            "speciesId": 21,
             "types": [
-              "PSYCHIC"
+              "NORMAL",
+              "FLYING"
             ]
           },
           {
@@ -1533,14 +1534,13 @@
             "claimed": false,
             "kills": 0,
             "level": 10,
-            "name": "Spearow",
+            "name": "Abra",
             "offensive": 1,
             "remaining": 100,
-            "slug": "spearow",
-            "speciesId": 21,
+            "slug": "abra",
+            "speciesId": 63,
             "types": [
-              "NORMAL",
-              "FLYING"
+              "PSYCHIC"
             ]
           },
           {
@@ -1636,21 +1636,6 @@
             "claimed": false,
             "kills": 0,
             "level": 20,
-            "name": "Gastly",
-            "offensive": 0.5,
-            "remaining": 100,
-            "slug": "gastly",
-            "speciesId": 92,
-            "types": [
-              "GHOST",
-              "POISON"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 20,
             "name": "Venonat",
             "offensive": 0.5,
             "remaining": 100,
@@ -1665,28 +1650,14 @@
             "canClaim": false,
             "claimed": false,
             "kills": 0,
-            "level": 10,
-            "name": "Ekans",
+            "level": 20,
+            "name": "Gastly",
             "offensive": 0.5,
             "remaining": 100,
-            "slug": "ekans",
-            "speciesId": 23,
+            "slug": "gastly",
+            "speciesId": 92,
             "types": [
-              "POISON"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 10,
-            "name": "Kakuna",
-            "offensive": 0.5,
-            "remaining": 100,
-            "slug": "kakuna",
-            "speciesId": 14,
-            "types": [
-              "BUG",
+              "GHOST",
               "POISON"
             ]
           },
@@ -1709,11 +1680,25 @@
             "claimed": false,
             "kills": 0,
             "level": 10,
-            "name": "Grimer",
+            "name": "Ekans",
             "offensive": 0.5,
             "remaining": 100,
-            "slug": "grimer",
-            "speciesId": 88,
+            "slug": "ekans",
+            "speciesId": 23,
+            "types": [
+              "POISON"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 10,
+            "name": "Nidoran Male",
+            "offensive": 0.5,
+            "remaining": 100,
+            "slug": "nidoranma",
+            "speciesId": 32,
             "types": [
               "POISON"
             ]
@@ -1738,11 +1723,26 @@
             "claimed": false,
             "kills": 0,
             "level": 10,
-            "name": "Koffing",
+            "name": "Kakuna",
             "offensive": 0.5,
             "remaining": 100,
-            "slug": "koffing",
-            "speciesId": 109,
+            "slug": "kakuna",
+            "speciesId": 14,
+            "types": [
+              "BUG",
+              "POISON"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 10,
+            "name": "Grimer",
+            "offensive": 0.5,
+            "remaining": 100,
+            "slug": "grimer",
+            "speciesId": 88,
             "types": [
               "POISON"
             ]
@@ -1752,11 +1752,11 @@
             "claimed": false,
             "kills": 0,
             "level": 10,
-            "name": "Nidoran Male",
+            "name": "Koffing",
             "offensive": 0.5,
             "remaining": 100,
-            "slug": "nidoranma",
-            "speciesId": 32,
+            "slug": "koffing",
+            "speciesId": 109,
             "types": [
               "POISON"
             ]
@@ -1794,21 +1794,6 @@
           {
             "canClaim": false,
             "claimed": true,
-            "kills": 100,
-            "level": 1,
-            "name": "Paras",
-            "offensive": 2,
-            "remaining": 0,
-            "slug": "paras",
-            "speciesId": 46,
-            "types": [
-              "BUG",
-              "GRASS"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": true,
             "kills": 54240,
             "level": 1,
             "name": "Geodude",
@@ -1824,16 +1809,31 @@
           {
             "canClaim": false,
             "claimed": true,
-            "kills": 101,
-            "level": 10,
-            "name": "Ledyba",
-            "offensive": 1,
+            "kills": 100,
+            "level": 1,
+            "name": "Paras",
+            "offensive": 2,
             "remaining": 0,
-            "slug": "ledyba",
-            "speciesId": 165,
+            "slug": "paras",
+            "speciesId": 46,
             "types": [
               "BUG",
-              "FLYING"
+              "GRASS"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": true,
+            "kills": 100,
+            "level": 10,
+            "name": "Magnemite",
+            "offensive": 0.5,
+            "remaining": 0,
+            "slug": "magnemite",
+            "speciesId": 81,
+            "types": [
+              "ELECTRIC",
+              "STEEL"
             ]
           },
           {
@@ -1854,16 +1854,16 @@
           {
             "canClaim": false,
             "claimed": true,
-            "kills": 100,
+            "kills": 101,
             "level": 10,
-            "name": "Magnemite",
-            "offensive": 0.5,
+            "name": "Ledyba",
+            "offensive": 1,
             "remaining": 0,
-            "slug": "magnemite",
-            "speciesId": 81,
+            "slug": "ledyba",
+            "speciesId": 165,
             "types": [
-              "ELECTRIC",
-              "STEEL"
+              "BUG",
+              "FLYING"
             ]
           },
           {
@@ -1916,6 +1916,21 @@
             "claimed": true,
             "kills": 100,
             "level": 30,
+            "name": "Butterfree",
+            "offensive": 1,
+            "remaining": 0,
+            "slug": "butterfree",
+            "speciesId": 12,
+            "types": [
+              "BUG",
+              "FLYING"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": true,
+            "kills": 100,
+            "level": 30,
             "name": "Larvitar",
             "offensive": 4,
             "remaining": 0,
@@ -1960,21 +1975,6 @@
             "claimed": true,
             "kills": 100,
             "level": 30,
-            "name": "Butterfree",
-            "offensive": 1,
-            "remaining": 0,
-            "slug": "butterfree",
-            "speciesId": 12,
-            "types": [
-              "BUG",
-              "FLYING"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": true,
-            "kills": 100,
-            "level": 30,
             "name": "Tyrogue",
             "offensive": 1,
             "remaining": 0,
@@ -1989,28 +1989,14 @@
             "claimed": true,
             "kills": 100,
             "level": 40,
-            "name": "Delibird",
-            "offensive": 1,
+            "name": "Graveler",
+            "offensive": 4,
             "remaining": 0,
-            "slug": "delibird",
-            "speciesId": 225,
+            "slug": "graveler",
+            "speciesId": 75,
             "types": [
-              "ICE",
-              "FLYING"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": true,
-            "kills": 100,
-            "level": 40,
-            "name": "Wartortle",
-            "offensive": 2,
-            "remaining": 0,
-            "slug": "wartortle",
-            "speciesId": 8,
-            "types": [
-              "WATER"
+              "ROCK",
+              "GROUND"
             ]
           },
           {
@@ -2032,14 +2018,13 @@
             "claimed": true,
             "kills": 100,
             "level": 40,
-            "name": "Graveler",
-            "offensive": 4,
+            "name": "Wartortle",
+            "offensive": 2,
             "remaining": 0,
-            "slug": "graveler",
-            "speciesId": 75,
+            "slug": "wartortle",
+            "speciesId": 8,
             "types": [
-              "ROCK",
-              "GROUND"
+              "WATER"
             ]
           },
           {
@@ -2075,6 +2060,21 @@
             "claimed": true,
             "kills": 100,
             "level": 40,
+            "name": "Delibird",
+            "offensive": 1,
+            "remaining": 0,
+            "slug": "delibird",
+            "speciesId": 225,
+            "types": [
+              "ICE",
+              "FLYING"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": true,
+            "kills": 100,
+            "level": 40,
             "name": "Ledian",
             "offensive": 1,
             "remaining": 0,
@@ -2083,21 +2083,6 @@
             "types": [
               "BUG",
               "FLYING"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": true,
-            "kills": 100,
-            "level": 50,
-            "name": "Corsola",
-            "offensive": 4,
-            "remaining": 0,
-            "slug": "corsola",
-            "speciesId": 222,
-            "types": [
-              "WATER",
-              "ROCK"
             ]
           },
           {
@@ -2120,13 +2105,14 @@
             "claimed": true,
             "kills": 100,
             "level": 50,
-            "name": "Kadabra",
-            "offensive": 1,
+            "name": "Jumpluff",
+            "offensive": 2,
             "remaining": 0,
-            "slug": "kadabra",
-            "speciesId": 64,
+            "slug": "jumpluff",
+            "speciesId": 189,
             "types": [
-              "PSYCHIC"
+              "GRASS",
+              "FLYING"
             ]
           },
           {
@@ -2134,13 +2120,13 @@
             "claimed": true,
             "kills": 100,
             "level": 50,
-            "name": "Tangela",
-            "offensive": 2,
+            "name": "Kadabra",
+            "offensive": 1,
             "remaining": 0,
-            "slug": "tangela",
-            "speciesId": 114,
+            "slug": "kadabra",
+            "speciesId": 64,
             "types": [
-              "GRASS"
+              "PSYCHIC"
             ]
           },
           {
@@ -2177,21 +2163,6 @@
             "claimed": true,
             "kills": 100,
             "level": 50,
-            "name": "Jumpluff",
-            "offensive": 2,
-            "remaining": 0,
-            "slug": "jumpluff",
-            "speciesId": 189,
-            "types": [
-              "GRASS",
-              "FLYING"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": true,
-            "kills": 100,
-            "level": 50,
             "name": "Yanma",
             "offensive": 1,
             "remaining": 0,
@@ -2206,14 +2177,43 @@
             "canClaim": false,
             "claimed": true,
             "kills": 100,
-            "level": 60,
-            "name": "Pupitar",
+            "level": 50,
+            "name": "Tangela",
+            "offensive": 2,
+            "remaining": 0,
+            "slug": "tangela",
+            "speciesId": 114,
+            "types": [
+              "GRASS"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": true,
+            "kills": 100,
+            "level": 50,
+            "name": "Corsola",
             "offensive": 4,
             "remaining": 0,
-            "slug": "pupitar",
-            "speciesId": 247,
+            "slug": "corsola",
+            "speciesId": 222,
             "types": [
-              "ROCK",
+              "WATER",
+              "ROCK"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": true,
+            "kills": 100,
+            "level": 60,
+            "name": "Quagsire",
+            "offensive": 4,
+            "remaining": 0,
+            "slug": "quagsire",
+            "speciesId": 195,
+            "types": [
+              "WATER",
               "GROUND"
             ]
           },
@@ -2252,13 +2252,13 @@
             "claimed": true,
             "kills": 100,
             "level": 60,
-            "name": "Quagsire",
+            "name": "Pupitar",
             "offensive": 4,
             "remaining": 0,
-            "slug": "quagsire",
-            "speciesId": 195,
+            "slug": "pupitar",
+            "speciesId": 247,
             "types": [
-              "WATER",
+              "ROCK",
               "GROUND"
             ]
           },
@@ -2294,12 +2294,12 @@
         "pokedexClaimed": false,
         "pokedexCurrentTarget": {
           "claimed": false,
-          "kills": 2,
+          "kills": 3,
           "level": 60,
           "name": "Cloyster",
           "offensive": 2,
-          "percent": 2,
-          "remaining": 98,
+          "percent": 3,
+          "remaining": 97,
           "slug": "cloyster",
           "speciesId": 91,
           "targetKills": 100,
@@ -2309,21 +2309,39 @@
           ]
         },
         "pokedexFarmMode": true,
-        "pokedexKills": "2/100",
+        "pokedexKills": "3/100",
         "pokedexPercent": "21.7%",
         "pokedexQueue": [
           {
             "canClaim": false,
             "claimed": false,
-            "kills": 2,
+            "kills": 3,
             "level": 60,
             "name": "Cloyster",
             "offensive": 2,
-            "remaining": 98,
+            "remaining": 97,
             "risk": 2,
-            "score": 26740,
+            "score": 26760,
             "slug": "cloyster",
             "speciesId": 91,
+            "targetKills": 100,
+            "types": [
+              "WATER",
+              "ICE"
+            ]
+          },
+          {
+            "canClaim": false,
+            "claimed": false,
+            "kills": 0,
+            "level": 60,
+            "name": "Dewgong",
+            "offensive": 2,
+            "remaining": 100,
+            "risk": 2,
+            "score": 26700,
+            "slug": "dewgong",
+            "speciesId": 87,
             "targetKills": 100,
             "types": [
               "WATER",
@@ -2346,24 +2364,6 @@
             "types": [
               "WATER",
               "PSYCHIC"
-            ]
-          },
-          {
-            "canClaim": false,
-            "claimed": false,
-            "kills": 0,
-            "level": 60,
-            "name": "Dewgong",
-            "offensive": 2,
-            "remaining": 100,
-            "risk": 2,
-            "score": 26700,
-            "slug": "dewgong",
-            "speciesId": 87,
-            "targetKills": 100,
-            "types": [
-              "WATER",
-              "ICE"
             ]
           },
           {
@@ -2461,12 +2461,12 @@
         "slug": "cloyster",
         "trainerLevel": 69,
         "trainerName": "Treinador #1",
-        "trainerXP": 5102159
+        "trainerXP": 5106495
       },
-      "gold": 93,
+      "gold": 143,
       "hp": 1152,
       "id": "acc-1",
-      "kills": 2,
+      "kills": 3,
       "level": 69,
       "logs": [
         "ðŸ›¡ï¸ [Equipe 4.0x] Novo elemento preservado para rotaÃ§Ã£o: Paras (Lv. 1)",
@@ -2479,19 +2479,19 @@
         "ðŸ›¡ï¸ [Equipe 4.0x] Novo elemento preservado para rotaÃ§Ã£o: Exeggcute (Lv. 1)",
         "ðŸ›¡ï¸ [Equipe 4.0x] Novo elemento preservado para rotaÃ§Ã£o: Magnemite (Lv. 1)",
         "Entrou na rota de caÃ§a: Cloyster (cloyster) | 2.0x (Super Efetivo) | Alto Risco | XP Máxima (Lv. 60)",
-        "PokÃ©bola (ID 1) lanÃ§ada em monstro pendente #0 (Shiny: false)",
-        "PokÃ©bola ID 1 falhou na captura."
+        "Aviso do jogo: Toda a sua equipe está desmaiada! Fale com a Enfermeira Joy para curá-la.",
+        "🏥 [Nurse Joy] Retornando à cidade (leave-hunt) para curar com Nurse Joy (joy-heal)..."
       ],
       "mana": 0,
       "maxHp": 1152,
       "maxMana": 0,
       "name": "Treinador #1",
-      "status": "hunting",
-      "updatedAt": 1792727885183
+      "status": "idle (fora de caÃ§a)",
+      "updatedAt": 1792728009188
     }
   ],
-  "goroutines": 10,
-  "ramAllocMB": 1.729644775390625,
+  "goroutines": 11,
+  "ramAllocMB": 2.5614395141601562,
   "ramSysMB": 17.59986114501953,
-  "uptime": "49h37m56s"
+  "uptime": "49h39m57s"
 }
