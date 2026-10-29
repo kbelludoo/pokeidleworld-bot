@@ -1,0 +1,18 @@
+[Unit]
+Description=Poke Idle World Autonomous Bot (Native Rust Zero-GC Engine)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu
+ExecStart=/home/ubuntu/bot-pokeidleworld-rust
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=RUST_LOG=info
+Environment=PORT=3007
+
+[Install]
+WantedBy=multi-user.target

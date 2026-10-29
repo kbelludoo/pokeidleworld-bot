@@ -1,0 +1,27 @@
+[package]
+name = "bot-pokeidleworld-rust"
+version = "0.1.0"
+edition = "2021"
+description = "Native Rust Zero-GC Autonomous Bot for Poke Idle World"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "0.21", features = ["rustls-tls-webpki-roots"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "http2"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+warp = "0.3"
+base64 = "0.22"
+urlencoding = "2.1"
+futures-util = "0.3"
+anyhow = "1.0"
+rand = "0.8"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
